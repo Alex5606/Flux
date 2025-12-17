@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Flux - Modern Messenger</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-logo">F</div>
+            <div class="loading-spinner"></div>
+            <p>Загрузка...</p>
+        </div>
+    </div>
+
+    <!-- Auth Screen -->
+    <div class="auth-screen hidden" id="authScreen">
+        <div class="auth-container">
+            <div class="auth-header">
+                <div class="auth-logo">F</div>
+                <h1>Flux</h1>
+                <p>Современный мессенджер для общения</p>
+            </div>
+
+            <!-- Login Form -->
+            <form class="auth-form" id="loginForm">
+                <h2>Вход в аккаунт</h2>
+                
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" placeholder="your@email.com" required autocomplete="email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginPassword">Пароль</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="loginPassword" placeholder="Минимум 6 символов" required minlength="6" autocomplete="current-password">
+                        <button type="button" class="toggle-password" data-target="loginPassword">
+                            <svg class="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-btn primary" id="loginBtn">
+                    <span>Войти</span>
+                    <div class="btn-loader"></div>
+                </button>
+
+                <div class="auth-divider">
+                    <span>или</span>
+                </div>
+
+                <button type="button" class="auth-btn secondary" id="showRegister">
+                    Создать аккаунт
+                </button>
+            </form>
+
+            <!-- Register Form -->
+            <form class="auth-form hidden" id="registerForm">
+                <h2>Регистрация</h2>
+                
+                <div class="form-group">
+                    <label for="registerName">Имя</label>
+                    <input type="text" id="registerName" placeholder="Как вас называть?" required minlength="2" maxlength="20" autocomplete="name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" placeholder="your@email.com" required autocomplete="email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerPassword">Пароль</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="registerPassword" placeholder="Минимум 6 символов" required minlength="6" autocomplete="new-password">
+                        <button type="button" class="toggle-password" data-target="registerPassword">
+                            <svg class="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-btn primary" id="registerBtn">
+                    <span>Зарегистрироваться</span>
+                    <div class="btn-loader"></div>
+                </button>
+
+                <div class="auth-divider">
+                    <span>или</span>
+                </div>
+
+                <button type="button" class="auth-btn secondary" id="showLogin">
+                    Уже есть аккаунт? Войти
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- App Screen -->
+    <div class="app-screen hidden" id="appScreen">
+        <div class="app-container">
+            <!-- Nav Sidebar -->
+            <nav class="nav-sidebar">
+                <div class="nav-logo">
+                    <div class="logo-icon">F</div>
+                </div>
+                
+                <div class="nav-items">
+                    <button class="nav-item active" data-tab="chats" title="Чаты">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <span class="nav-badge" id="chatsBadge"></span>
+                    </button>
+                    
+                    <button class="nav-item" data-tab="friends" title="Друзья">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <span class="nav-badge" id="friendsBadge"></span>
+                    </button>
+                    
+                    <button class="nav-item" data-tab="search" title="Поиск">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="M21 21l-4.35-4.35"></path>
+                        </svg>
+                    </button>
+                    
+                    <button class="nav-item" data-tab="saved" title="Избранное">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="nav-bottom">
+                    <button class="nav-item" data-tab="settings" title="Настройки">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                    </button>
+                    
+                    <div class="nav-profile" id="navProfile">
+                        <div class="nav-avatar" id="navAvatar">?</div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- List Panel -->
+            <aside class="list-panel" id="listPanel">
+                <!-- Chats Panel -->
+                <div class="panel-content active" id="chatsPanel">
+                    <div class="panel-header">
+                        <h2>Чаты</h2>
+                        <button class="panel-action" id="newChatBtn" title="Новый чат">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="panel-search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="M21 21l-4.35-4.35"></path>
+                        </svg>
+                        <input type="text" placeholder="Поиск чатов..." id="searchChats">
+                    </div>
+                    <div class="panel-list" id="chatsList">
+                        <div class="empty-panel">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <p>Нет активных чатов</p>
+                            <span>Найдите друзей и начните общение</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Friends Panel -->
+                <div class="panel-content" id="friendsPanel">
+                    <div class="panel-header">
+                        <h2>Друзья</h2>
+                    </div>
+                    <div class="panel-tabs">
+                        <button class="panel-tab active" data-friends-tab="all">Все</button>
+                        <button class="panel-tab" data-friends-tab="online">Онлайн</button>
+                        <button class="panel-tab" data-friends-tab="requests">Запросы <span class="badge" id="requestsCount"></span></button>
+                    </div>
+                    <div class="panel-list" id="friendsList">
+                        <div class="empty-panel">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                            </svg>
+                            <p>Список друзей пуст</p>
+                            <span>Найдите друзей через поиск</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Panel -->
+                <div class="panel-content" id="searchPanel">
+                    <div class="panel-header">
+                        <h2>Поиск</h2>
+                    </div>
+                    <div class="panel-search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="M21 21l-4.35-4.35"></path>
+                        </svg>
+                        <input type="text" placeholder="Поиск по имени..." id="searchUsers">
+                    </div>
+                    <div class="panel-list" id="searchResults">
+                        <div class="empty-panel">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="M21 21l-4.35-4.35"></path>
+                            </svg>
+                            <p>Введите имя для поиска</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Saved Panel -->
+                <div class="panel-content" id="savedPanel">
+                    <div class="panel-header">
+                        <h2>Избранное</h2>
+                    </div>
+                    <div class="panel-list" id="savedList">
+                        <div class="empty-panel">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <p>Нет сохранённых сообщений</p>
+                            <span>Нажмите на сообщение и выберите "В избранное"</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Panel -->
+                <div class="panel-content" id="settingsPanel">
+                    <div class="panel-header">
+                        <h2>Настройки</h2>
+                    </div>
+                    <div class="settings-content">
+                        <div class="settings-profile">
+                            <div class="profile-avatar-wrapper">
+                                <div class="profile-avatar-large" id="profileAvatarLarge">?</div>
+                                <label class="change-avatar-btn" for="avatarInput">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                                        <circle cx="12" cy="13" r="4"></circle>
+                                    </svg>
+                                </label>
+                                <input type="file" id="avatarInput" accept="image/*" hidden>
+                            </div>
+                            <div class="profile-name-display" id="profileNameDisplay">Пользователь</div>
+                            <div class="profile-status-display" id="profileStatusDisplay">Онлайн</div>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <h3>Профиль</h3>
+                            <div class="settings-field">
+                                <label>Имя</label>
+                                <input type="text" id="settingsName" placeholder="Ваше имя" maxlength="20">
+                            </div>
+                            <div class="settings-field">
+                                <label>Статус</label>
+                                <input type="text" id="settingsStatus" placeholder="Что у вас нового?" maxlength="100">
+                            </div>
+                            <button class="settings-save-btn" id="saveProfileBtn">Сохранить</button>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <h3>Уведомления</h3>
+                            <label class="settings-toggle">
+                                <span>Звук сообщений</span>
+                                <input type="checkbox" id="notifSound" checked>
+                                <div class="toggle-slider"></div>
+                            </label>
+                            <label class="settings-toggle">
+                                <span>Звук звонков</span>
+                                <input type="checkbox" id="notifCall" checked>
+                                <div class="toggle-slider"></div>
+                            </label>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <h3>Тема</h3>
+                            <div class="theme-options">
+                                <button class="theme-btn active" data-theme="light">☀️ Светлая</button>
+                                <button class="theme-btn" data-theme="dark">🌙 Тёмная</button>
+                            </div>
+                        </div>
+                        
+                        <button class="logout-btn-full" id="logoutBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                            Выйти из аккаунта
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Area -->
+            <main class="main-area" id="mainArea">
+                <!-- Empty State -->
+                <div class="main-empty" id="mainEmpty">
+                    <div class="icon-wrapper">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <h2>Выберите чат</h2>
+                    <p>Найдите друзей и начните общение</p>
+                </div>
+
+                <!-- Chat Container -->
+                <div class="chat-container hidden" id="chatContainer">
+                    <header class="chat-header">
+                        <button class="back-btn" id="backBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 12H5M12 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
+                        
+                        <div class="chat-user-info" id="chatUserInfo">
+                            <div class="chat-avatar" id="chatAvatar">?</div>
+                            <div class="chat-info">
+                                <div class="chat-name" id="chatName">Имя</div>
+                                <div class="chat-status" id="chatStatus">Не в сети</div>
+                            </div>
+                        </div>
+                        
+                        <div class="chat-actions">
+                            <button class="chat-action-btn" id="callBtn" title="Позвонить">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                </svg>
+                            </button>
+                            <button class="chat-action-btn" id="videoCallBtn" title="Видеозвонок">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                                </svg>
+                            </button>
+                            <div class="dropdown">
+                                <button class="chat-action-btn" id="chatMenuBtn" title="Меню">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="1"></circle>
+                                        <circle cx="12" cy="5" r="1"></circle>
+                                        <circle cx="12" cy="19" r="1"></circle>
+                                    </svg>
+                                </button>
+                                <div class="dropdown-menu" id="chatDropdownMenu">
+                                    <button class="dropdown-item" id="clearHistoryBtn">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                        </svg>
+                                        Очистить историю
+                                    </button>
+                                    <div class="dropdown-divider"></div>
+                                    <button class="dropdown-item danger" id="blockChatUserBtn">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                                        </svg>
+                                        Заблокировать
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div class="messages-area" id="messagesArea">
+                        <div class="messages-list" id="messagesList"></div>
+                    </div>
+
+                    <div class="typing-indicator hidden" id="typingIndicator">
+                        <div class="typing-dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <span class="typing-text">печатает...</span>
+                    </div>
+
+                    <footer class="message-input-area">
+                        <button class="input-action-btn" id="attachBtn" title="Прикрепить">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                            </svg>
+                        </button>
+                        <input type="file" id="fileInput" accept="image/*" hidden>
+                        
+                        <div class="input-wrapper">
+                            <textarea id="messageInput" placeholder="Напишите сообщение..." rows="1" maxlength="2000"></textarea>
+                            <button class="emoji-btn" id="emojiBtn" title="Эмодзи">😊</button>
+                        </div>
+                        
+                        <button class="send-btn" id="sendBtn" title="Отправить">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </button>
+                    </footer>
+                </div>
+
+                <!-- User Profile View -->
+                <div class="user-profile-view hidden" id="userProfileView">
+                    <button class="profile-close-btn" id="closeProfileBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                    
+                    <div class="profile-header">
+                        <div class="profile-avatar-xl" id="viewProfileAvatar">?</div>
+                        <h2 id="viewProfileName">Имя пользователя</h2>
+                        <p class="status" id="viewProfileStatus">Онлайн</p>
+                    </div>
+                    
+                    <div class="profile-actions">
+                        <button class="profile-action-btn" id="profileMessageBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            Написать
+                        </button>
+                        <button class="profile-action-btn" id="profileCallBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                            Позвонить
+                        </button>
+                    </div>
+                    
+                    <div class="profile-info">
+                        <div class="profile-info-item">
+                            <span class="profile-info-label">Email</span>
+                            <span class="profile-info-value" id="viewProfileEmail">email@example.com</span>
+                        </div>
+                        <div class="profile-info-item">
+                            <span class="profile-info-label">О себе</span>
+                            <span class="profile-info-value" id="viewProfileBio">Привет! Я использую Flux</span>
+                        </div>
+                        <div class="profile-info-item">
+                            <span class="profile-info-label">В приложении с</span>
+                            <span class="profile-info-value" id="viewProfileJoined">1 января 2024</span>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-danger-actions">
+                        <button class="danger-btn" id="blockUserBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                            </svg>
+                            Заблокировать
+                        </button>
+                        <button class="danger-btn hidden" id="removeFriendBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="8.5" cy="7" r="4"></circle>
+                                <line x1="18" y1="8" x2="23" y2="13"></line>
+                                <line x1="23" y1="8" x2="18" y2="13"></line>
+                            </svg>
+                            Удалить из друзей
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Call Modal -->
+        <div class="call-modal hidden" id="callModal">
+            <div class="call-content">
+                <div class="call-avatar" id="callAvatar">?</div>
+                <h2 id="callName">Имя</h2>
+                <p class="call-status" id="callStatusText">Вызов...</p>
+                <div class="call-timer hidden" id="callTimer">00:00</div>
+                
+                <div class="call-actions">
+                    <button class="call-btn mute" id="muteBtn" title="Микрофон">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                            <line x1="12" y1="19" x2="12" y2="23"></line>
+                            <line x1="8" y1="23" x2="16" y2="23"></line>
+                        </svg>
+                    </button>
+                    <button class="call-btn end" id="endCallBtn" title="Завершить">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"></path>
+                            <line x1="1" y1="1" x2="23" y2="23"></line>
+                        </svg>
+                    </button>
+                    <button class="call-btn speaker" id="speakerBtn" title="Динамик">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Incoming Call -->
+        <div class="incoming-call hidden" id="incomingCall">
+            <div class="incoming-content">
+                <div class="incoming-avatar" id="incomingAvatar">?</div>
+                <h3 id="incomingName">Имя</h3>
+                <p id="incomingType">Входящий звонок...</p>
+                <div class="incoming-actions">
+                    <button class="incoming-btn decline" id="declineCallBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                    <button class="incoming-btn accept" id="acceptCallBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Context Menu -->
+        <div class="context-menu hidden" id="messageContextMenu">
+            <button class="context-item" data-action="reply">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 14 4 9 9 4"></polyline>
+                    <path d="M20 20v-7a4 4 0 0 0-4-4H4"></path>
+                </svg>
+                Ответить
+            </button>
+            <button class="context-item" data-action="edit">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                Редактировать
+            </button>
+            <button class="context-item" data-action="copy">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                Копировать
+            </button>
+            <button class="context-item" data-action="save">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+                В избранное
+            </button>
+            <button class="context-item" data-action="forward">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 10 20 15 15 20"></polyline>
+                    <path d="M4 4v7a4 4 0 0 0 4 4h12"></path>
+                </svg>
+                Переслать
+            </button>
+            <button class="context-item danger" data-action="delete">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Удалить
+            </button>
+        </div>
+
+        <!-- Emoji Picker -->
+        <div class="emoji-picker hidden" id="emojiPicker">
+            <div class="emoji-tabs">
+                <button class="emoji-tab active" data-category="smileys">😀</button>
+                <button class="emoji-tab" data-category="gestures">👋</button>
+                <button class="emoji-tab" data-category="hearts">❤️</button>
+                <button class="emoji-tab" data-category="animals">🐶</button>
+                <button class="emoji-tab" data-category="food">🍕</button>
+                <button class="emoji-tab" data-category="objects">⚽</button>
+            </div>
+            <div class="emoji-grid" id="emojiGrid"></div>
+        </div>
+
+        <!-- Image Viewer -->
+        <div class="image-viewer hidden" id="imageViewer">
+            <button class="image-viewer-close" id="closeImageViewer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <img id="viewerImage" src="" alt="Image">
+        </div>
+    </div>
+
+    <!-- Audio -->
+    <audio id="messageSound" preload="auto"></audio>
+    <audio id="callSound" preload="auto" loop></audio>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
