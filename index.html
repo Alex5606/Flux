@@ -1,383 +1,529 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Flux - New Year Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flux Messenger</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* ========== RESET & BASE ========== */
-        *, *::before, *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400&display=swap');
 
-        html { height: 100%; height: -webkit-fill-available; }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg-main);
-            color: var(--text-primary);
-            height: 100%;
-            min-height: -webkit-fill-available;
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-        button, input, textarea { font: inherit; border: none; outline: none; background: none; }
-        button { cursor: pointer; user-select: none; transition: all 0.2s ease; }
-        button:active { transform: scale(0.96); }
-        a { text-decoration: none; color: inherit; }
-        img { max-width: 100%; display: block; }
-        .hidden { display: none !important; }
-
-        /* ========== THEME ========== */
+        /* Base Settings */
         :root {
-            --primary: #6366f1;
-            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            --holiday-red: #ef4444;
-            
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            
-            --bg-main: #f1f5f9;
-            --bg-card: #ffffff;
-            --bg-hover: #e2e8f0;
-            --bg-input: #f8fafc;
-            
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            
-            --border: #e2e8f0;
-            --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.16);
-            --radius: 12px;
-            
-            --nav-width: 72px;
-            --list-width: 320px;
-            --header-height: 64px;
+            --safe-bottom: env(safe-area-inset-bottom, 20px);
         }
 
-        [data-theme="dark"] {
-            --bg-main: #0f172a;
-            --bg-card: #1e293b;
-            --bg-hover: #334155;
-            --bg-input: #0f172a;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --border: #334155;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.4), transparent 25%), 
+                radial-gradient(circle at 85% 30%, rgba(56, 189, 248, 0.25), transparent 25%);
+            background-attachment: fixed;
+            background-size: cover;
+            color: #e4e4e7;
+            overflow: hidden; 
+            touch-action: manipulation; /* Improves touch response */
         }
 
-        [data-theme="christmas"] {
-            --bg-main: #0b1120;
-            --bg-card: #151e32;
-            --bg-hover: #232d4b;
-            --bg-input: #0f172a;
-            --text-primary: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --primary: #ef4444;
-            --primary-gradient: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
-            --border: #334155;
+        /* Glass Utilities */
+        .glass {
+            background: rgba(23, 23, 23, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        /* Snowfall */
-        .snow-container { position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
-        .snowflake { position: absolute; color: #fff; opacity: 0.8; animation: snowfall linear infinite; }
-        @keyframes snowfall { 0% { transform: translateY(-10vh); opacity: 1; } 100% { transform: translateY(100vh); opacity: 0.3; } }
-
-        /* Layout */
-        .app-screen { display: flex; height: 100%; position: relative; z-index: 2; }
-        
-        /* Sidebar */
-        .nav-sidebar {
-            width: var(--nav-width); background: var(--bg-card); border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; align-items: center; padding: 20px 0; z-index: 50;
+        .glass-heavy {
+            background: rgba(9, 9, 11, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
-        .nav-logo { width: 40px; height: 40px; background: var(--primary-gradient); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-bottom: 30px; }
-        .nav-item { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); margin-bottom: 12px; position: relative; }
-        .nav-item.active, .nav-item:hover { background: var(--bg-hover); color: var(--primary); }
-        .nav-badge { position: absolute; top: -2px; right: -2px; background: var(--holiday-red); color: white; font-size: 10px; min-width: 16px; height: 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
 
-        /* List Panel */
-        .list-panel { width: var(--list-width); background: var(--bg-main); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-        .panel-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .panel-header h2 { font-size: 22px; font-weight: 700; }
-        .panel-search { margin: 0 16px 16px; position: relative; }
-        .panel-search input { width: 100%; padding: 10px 16px 10px 40px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); }
-        .panel-search svg { position: absolute; left: 12px; top: 12px; width: 18px; height: 18px; color: var(--text-secondary); }
-        .list-items { flex: 1; overflow-y: auto; padding: 0 10px 10px; }
-        .list-item { display: flex; align-items: center; padding: 12px; border-radius: var(--radius); cursor: pointer; margin-bottom: 4px; transition: background 0.2s; }
-        .list-item:hover { background: var(--bg-hover); }
-        .list-item.active { background: rgba(99, 102, 241, 0.15); }
-        [data-theme="christmas"] .list-item.active { background: rgba(239, 68, 68, 0.2); }
+        .glass-panel {
+            background: rgba(9, 9, 11, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
 
-        .item-avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--primary-gradient); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 18px; margin-right: 12px; position: relative; flex-shrink: 0; }
-        .item-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        .online-dot { position: absolute; bottom: 0; right: 0; width: 12px; height: 12px; background: var(--success); border: 2px solid var(--bg-card); border-radius: 50%; }
-        .santa-hat { position: absolute; top: -15px; left: -10px; width: 30px; height: 30px; z-index: 5; pointer-events: none; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.3)); }
+        /* Custom Scrollbar - Global & Mobile Fixes */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 99px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
         
-        .item-content { flex: 1; min-width: 0; }
-        .item-top { display: flex; justify-content: space-between; margin-bottom: 4px; }
-        .item-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .item-time { font-size: 12px; color: var(--text-secondary); }
-        .item-preview { font-size: 13px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px; }
-        
-        /* Main Area */
-        .main-area { flex: 1; display: flex; flex-direction: column; background: var(--bg-card); position: relative; }
-        .chat-header { height: var(--header-height); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; justify-content: space-between; background: var(--bg-card); z-index: 10; }
-        .chat-user { display: flex; align-items: center; gap: 12px; cursor: pointer; }
-        .chat-status { font-size: 13px; color: var(--text-secondary); }
-        .chat-status.online { color: var(--success); }
-        .chat-status.typing { color: var(--primary); font-weight: 500; animation: pulse 1s infinite; }
-        @keyframes pulse { 50% { opacity: 0.5; } }
-        
-        .messages-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 8px; background-image: radial-gradient(var(--border) 1px, transparent 1px); background-size: 20px 20px; }
-        .message-group { display: flex; flex-direction: column; gap: 2px; max-width: 70%; position: relative; }
-        .message-group.own { align-self: flex-end; align-items: flex-end; }
-        .message-bubble { padding: 10px 14px; border-radius: 18px; font-size: 15px; line-height: 1.4; position: relative; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .message-group:not(.own) .message-bubble { background: var(--bg-hover); border-bottom-left-radius: 4px; }
-        .message-group.own .message-bubble { background: var(--primary-gradient); color: white; border-bottom-right-radius: 4px; }
-        .message-meta { display: flex; align-items: center; gap: 4px; font-size: 11px; margin-top: 2px; opacity: 0.7; justify-content: flex-end; min-width: 50px; }
-        .own .message-meta { color: rgba(255,255,255,0.9); }
-        .message-image { border-radius: 12px; max-width: 280px; cursor: pointer; border: 1px solid var(--border); }
-        .tick { width: 14px; height: 14px; }
-        .tick.read { color: #6ee7b7; }
+        /* Hide scrollbar for clean mobile look but keep functionality if needed */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
-        /* Input */
-        .input-area { padding: 16px 20px; background: var(--bg-card); border-top: 1px solid var(--border); display: flex; align-items: flex-end; gap: 12px; }
-        .input-wrapper { flex: 1; background: var(--bg-input); border-radius: 24px; border: 1px solid var(--border); display: flex; align-items: center; padding: 4px 12px; min-height: 48px; }
-        .message-input { flex: 1; padding: 10px 0; max-height: 100px; overflow-y: auto; resize: none; }
-        .voice-btn, .send-btn, .action-btn { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .voice-btn:hover, .action-btn:hover { background: var(--bg-hover); }
-        .send-btn { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
-        .voice-btn.recording { background: var(--danger); color: white; animation: pulse-red 1.5s infinite; }
-        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(0,0,0,0); } }
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
 
-        /* Modals */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
-        .modal-overlay.open { opacity: 1; pointer-events: auto; }
-        .modal-card { background: var(--bg-card); border-radius: 24px; padding: 30px; width: 90%; max-width: 400px; box-shadow: var(--shadow-xl); transform: scale(0.9); transition: transform 0.2s; border: 1px solid var(--border); }
-        .modal-overlay.open .modal-card { transform: scale(1); }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-        /* Loading */
-        .loading-screen { position: fixed; inset: 0; background: var(--primary-gradient); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; transition: opacity 0.5s; }
-        .loading-screen.fade-out { opacity: 0; pointer-events: none; }
-        .loading-spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes slideInRight {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
 
-        /* Mobile */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+        }
+
+        .animate-fade-in { animation: fadeIn 0.25s ease-out; }
+        .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .animate-slide-in-right { animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .animate-pulse-ring { animation: pulse-ring 2s infinite; }
+
+        /* Typing Animation */
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+
+        .typing-dot {
+            animation: typingBounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        /* Mobile Optimizations */
         @media (max-width: 768px) {
-            :root { --nav-width: 0px; --list-width: 100%; }
-            .nav-sidebar { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; flex-direction: row; padding: 0 20px; justify-content: space-around; border-top: 1px solid var(--border); border-right: none; }
-            .nav-logo, .nav-item:last-child { display: none; }
-            .nav-item { margin: 0; }
-            .list-panel { width: 100%; height: calc(100% - 60px); }
-            .main-area { position: fixed; inset: 0; z-index: 60; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-            .main-area.open { transform: translateX(0); }
-            .back-btn { display: flex !important; }
+            .glass-panel {
+                background: rgba(9, 9, 11, 0.95);
+            }
         }
-
-        /* Utils */
-        .avatar-1 { background: linear-gradient(135deg, #f472b6, #ec4899); }
-        .avatar-2 { background: linear-gradient(135deg, #a78bfa, #8b5cf6); }
-        .avatar-3 { background: linear-gradient(135deg, #60a5fa, #3b82f6); }
-        .avatar-4 { background: linear-gradient(135deg, #34d399, #10b981); }
-        .avatar-5 { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
-        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 50px; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 2000; }
-        .toast.show { opacity: 1; }
-        
-        /* Auth */
-        .auth-screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: url('https://images.unsplash.com/photo-1544084944-152696a63f72?auto=format&fit=crop&w=1950&q=80') center/cover; z-index: 999; }
-        .auth-screen::before { content: ''; position: absolute; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); }
-        .auth-container { width: 100%; max-width: 400px; background: var(--bg-card); border-radius: 24px; padding: 40px; position: relative; z-index: 10; border: 1px solid var(--border); }
-        .auth-input { width: 100%; padding: 14px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; color: var(--text-primary); }
     </style>
 </head>
-<body data-theme="christmas">
+<body class="h-screen w-screen overflow-hidden selection:bg-violet-500/30">
 
-    <div class="loading-screen" id="loadingScreen">
-        <div class="loading-spinner"></div>
-        <p>Загрузка Flux...</p>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="fixed inset-0 z-[100] bg-zinc-950 flex flex-col items-center justify-center transition-opacity duration-500 glass-heavy">
+        <div class="relative w-20 h-20 mb-4">
+            <div class="absolute inset-0 border-4 border-zinc-800 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-violet-500 rounded-full border-t-transparent animate-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center font-bold text-2xl text-white">F</div>
+        </div>
+        <p class="text-zinc-500 text-sm font-medium animate-pulse">Initializing Flux...</p>
     </div>
 
-    <div class="snow-container" id="snowContainer"></div>
-    <div class="toast" id="toast"></div>
-
-    <!-- Auth -->
-    <div class="auth-screen hidden" id="authScreen">
-        <div class="auth-container">
-            <div style="font-size: 40px; text-align: center; margin-bottom: 10px;">🎅</div>
-            <h1 style="text-align: center; margin-bottom: 30px; font-weight: 800; font-size: 28px; color: var(--text-primary);">Flux</h1>
+    <!-- Auth Screen -->
+    <div id="authScreen" class="hidden w-full h-full flex items-center justify-center p-4">
+        <div class="w-full max-w-md glass p-8 rounded-2xl shadow-2xl relative overflow-hidden animate-slide-up">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-500"></div>
             
-            <form id="loginForm">
-                <input type="email" class="auth-input" id="email" placeholder="Email" required>
-                <input type="password" class="auth-input" id="password" placeholder="Пароль" required>
-                <button type="submit" class="auth-input" style="background: var(--primary-gradient); color: white; font-weight: 600;">Войти</button>
-                <button type="button" class="auth-input" style="background: transparent; border: none; color: var(--text-secondary);" id="toggleAuth">Создать аккаунт</button>
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-xl mx-auto flex items-center justify-center shadow-lg shadow-violet-500/20 mb-4 transform rotate-3">
+                    <i data-lucide="zap" class="w-8 h-8 text-white"></i>
+                </div>
+                <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">Flux Messenger</h1>
+                <p class="text-zinc-500 mt-2 text-sm">Connect with your world seamlessly.</p>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-zinc-400 mb-1 ml-1">Email Address</label>
+                    <div class="relative">
+                        <i data-lucide="mail" class="absolute left-3 top-3 w-5 h-5 text-zinc-500"></i>
+                        <input type="email" id="loginEmail" class="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all" placeholder="name@example.com" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-zinc-400 mb-1 ml-1">Password</label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="absolute left-3 top-3 w-5 h-5 text-zinc-500"></i>
+                        <input type="password" id="loginPassword" class="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 pl-10 pr-10 text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all" placeholder="••••••••" required>
+                        <button type="button" class="absolute right-3 top-3 text-zinc-500 hover:text-white toggle-password" data-target="loginPassword">
+                            <i data-lucide="eye" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" id="loginBtn" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-medium py-2.5 rounded-xl shadow-lg shadow-violet-600/20 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+                    Sign In
+                </button>
+                <p class="text-center text-sm text-zinc-500 mt-4">
+                    Don't have an account? <button type="button" id="showRegister" class="text-violet-400 hover:text-violet-300 font-medium hover:underline">Create one</button>
+                </p>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" class="hidden space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-zinc-400 mb-1 ml-1">Full Name</label>
+                    <div class="relative">
+                        <i data-lucide="user" class="absolute left-3 top-3 w-5 h-5 text-zinc-500"></i>
+                        <input type="text" id="registerName" class="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all" placeholder="John Doe" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-zinc-400 mb-1 ml-1">Email Address</label>
+                    <div class="relative">
+                        <i data-lucide="mail" class="absolute left-3 top-3 w-5 h-5 text-zinc-500"></i>
+                        <input type="email" id="registerEmail" class="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all" placeholder="name@example.com" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-zinc-400 mb-1 ml-1">Password</label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="absolute left-3 top-3 w-5 h-5 text-zinc-500"></i>
+                        <input type="password" id="registerPassword" class="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 pl-10 pr-10 text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all" placeholder="••••••••" required>
+                        <button type="button" class="absolute right-3 top-3 text-zinc-500 hover:text-white toggle-password" data-target="registerPassword">
+                            <i data-lucide="eye" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" id="registerBtn" class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-medium py-2.5 rounded-xl shadow-lg shadow-violet-600/20 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+                    Create Account
+                </button>
+                <p class="text-center text-sm text-zinc-500 mt-4">
+                    Already have an account? <button type="button" id="showLogin" class="text-violet-400 hover:text-violet-300 font-medium hover:underline">Sign in</button>
+                </p>
             </form>
         </div>
     </div>
 
-    <!-- App -->
-    <div class="app-screen hidden" id="appScreen">
-        <!-- Sidebar -->
-        <nav class="nav-sidebar">
-            <div class="nav-logo">F</div>
-            <button class="nav-item active" onclick="switchTab('chats')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                <span class="nav-badge hidden" id="globalUnread">0</span>
+    <!-- App Screen -->
+    <div id="appScreen" class="hidden flex h-full w-full overflow-hidden">
+        
+        <!-- Navigation Rail (Desktop) -->
+        <nav class="hidden md:flex w-20 glass-panel flex-col items-center py-6 gap-6 z-20 flex-shrink-0">
+            <div class="mb-2">
+                <div class="w-10 h-10 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
+                    <i data-lucide="zap" class="w-6 h-6 text-white"></i>
+                </div>
+            </div>
+
+            <button class="nav-item w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-white/10 text-white" data-tab="chats">
+                <i data-lucide="message-square" class="w-5 h-5"></i>
             </button>
-            <button class="nav-item" onclick="switchTab('users')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+            <button class="nav-item w-10 h-10 rounded-xl flex items-center justify-center transition-all text-zinc-500 hover:bg-white/5 hover:text-zinc-300 relative" data-tab="friends">
+                <i data-lucide="users" class="w-5 h-5"></i>
+                <div id="friendsBadge" class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full hidden"></div>
             </button>
-            <button class="nav-item" onclick="switchTab('settings')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <button class="nav-item w-10 h-10 rounded-xl flex items-center justify-center transition-all text-zinc-500 hover:bg-white/5 hover:text-zinc-300" data-tab="saved">
+                <i data-lucide="bookmark" class="w-5 h-5"></i>
             </button>
-            <div style="margin-top: auto; padding-bottom: 20px;">
-                <div class="item-avatar" id="myAvatar">?</div>
+
+            <div class="mt-auto flex flex-col items-center gap-4">
+                <div id="navAvatar" class="w-10 h-10 rounded-full bg-zinc-800 cursor-pointer hover:ring-2 hover:ring-white/20 transition-all"></div>
             </div>
         </nav>
 
-        <!-- Panels -->
-        <aside class="list-panel" id="panel-chats">
-            <div class="panel-header">
-                <h2>Чаты</h2>
-                <button class="action-btn" onclick="openCreateGroupModal()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg>
-                </button>
-            </div>
-            <div class="panel-search">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg>
-                <input type="text" placeholder="Поиск..." oninput="filterList('chatsList', this.value)">
-            </div>
-            <div class="list-items" id="chatsList"></div>
-        </aside>
-
-        <aside class="list-panel hidden" id="panel-users">
-            <div class="panel-header"><h2>Контакты</h2></div>
-            <div class="panel-search">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg>
-                <input type="text" placeholder="Поиск людей..." oninput="filterList('usersList', this.value)">
-            </div>
-            <div class="list-items" id="usersList"></div>
-        </aside>
-
-        <aside class="list-panel hidden" id="panel-settings">
-            <div class="panel-header"><h2>Настройки</h2></div>
-            <div style="padding: 20px;">
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label style="display:block; margin-bottom:8px; font-weight:600;">Имя</label>
-                    <input type="text" id="settingsName" class="auth-input">
+        <!-- Sidebar Panel (Full width on mobile, 80 on desktop) -->
+        <aside class="w-full md:w-80 glass-panel border-r-0 flex flex-col z-10 flex-shrink-0 relative h-full md:translate-x-0" id="sidebarPanel">
+            
+            <!-- Chats Panel -->
+            <div id="chatsPanel" class="panel-content flex flex-col h-full animate-fade-in">
+                <div class="p-4 pb-2">
+                    <h2 class="text-xl font-bold mb-4 px-1">Chats</h2>
+                    <div class="relative">
+                        <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-zinc-500"></i>
+                        <input type="text" id="searchUsers" class="w-full bg-black/20 border border-white/5 rounded-xl py-2 pl-9 pr-4 text-sm text-white placeholder-zinc-500 focus:outline-none focus:bg-black/40 focus:border-white/10 transition-all" placeholder="Search for people...">
+                    </div>
                 </div>
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label style="display:block; margin-bottom:8px; font-weight:600;">Статус</label>
-                    <input type="text" id="settingsStatus" class="auth-input">
+                <div id="searchResults" class="px-2 pb-2"></div>
+                <div id="chatsList" class="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-24 md:pb-2 space-y-1">
+                    <!-- Chats will be injected here -->
                 </div>
-                <button class="auth-input" style="background: var(--primary); color:white;" onclick="saveProfile()">Сохранить</button>
-                
-                <hr style="border-top:1px solid var(--border); margin: 20px 0;">
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <span>Новогодний режим ❄️</span>
-                    <input type="checkbox" checked onchange="toggleSnow(this.checked)">
-                </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <span>Тёмная тема 🌙</span>
-                    <input type="checkbox" onchange="toggleTheme(this.checked)">
-                </div>
-                <button class="auth-input" style="background:var(--bg-hover); color:var(--danger);" onclick="logout()">Выйти</button>
-            </div>
-        </aside>
-
-        <!-- Main Chat -->
-        <main class="main-area" id="mainArea">
-            <div id="emptyState" style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
-                <div style="font-size:60px; margin-bottom:20px;">🎄</div>
-                <h2 style="font-size:24px; font-weight:bold; margin-bottom:10px;">Flux Messenger</h2>
-                <p style="color:var(--text-secondary);">Выберите чат чтобы начать общение</p>
             </div>
 
-            <div id="chatView" class="hidden" style="height:100%; display:flex; flex-direction:column;">
-                <header class="chat-header">
-                    <button class="action-btn back-btn hidden" onclick="closeChat()">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
-                    </button>
-                    <div class="chat-user" onclick="viewContactInfo()">
-                        <div class="item-avatar" id="chatAvatar">?</div>
+            <!-- Friends Panel -->
+            <div id="friendsPanel" class="panel-content hidden flex flex-col h-full animate-fade-in">
+                <div class="p-4 pb-0 flex-shrink-0">
+                    <h2 class="text-xl font-bold mb-4 px-1">Friends</h2>
+                    <div class="flex gap-2 mb-4 bg-black/20 p-1 rounded-xl">
+                        <button class="panel-tab flex-1 py-1.5 text-xs font-medium rounded-lg bg-white/10 text-white transition-all duration-300" data-friends-tab="all">All</button>
+                        <button class="panel-tab flex-1 py-1.5 text-xs font-medium rounded-lg text-zinc-500 hover:bg-white/5 hover:text-zinc-300 transition-all duration-300" data-friends-tab="online">Online</button>
+                        <button class="panel-tab flex-1 py-1.5 text-xs font-medium rounded-lg text-zinc-500 hover:bg-white/5 hover:text-zinc-300 transition-all duration-300 relative" data-friends-tab="requests">
+                            Requests
+                            <span id="requestsCount" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-[10px] flex items-center justify-center rounded-full text-white hidden">0</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="friendsList" class="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-24 md:pb-2 custom-scrollbar"></div>
+            </div>
+
+            <!-- Saved Panel -->
+            <div id="savedPanel" class="panel-content hidden flex flex-col h-full animate-fade-in">
+                <div class="p-4">
+                    <h2 class="text-xl font-bold mb-2 px-1">Saved Messages</h2>
+                    <p class="text-xs text-zinc-500 px-1 mb-4">Keep your important messages handy.</p>
+                </div>
+                <div id="savedList" class="flex-1 overflow-y-auto px-2 pb-24 md:pb-2"></div>
+            </div>
+
+            <!-- Settings Panel -->
+            <div id="settingsPanel" class="panel-content hidden flex flex-col h-full animate-fade-in">
+                <div class="p-4 border-b border-white/5">
+                    <h2 class="text-xl font-bold px-1">Settings</h2>
+                </div>
+                <div class="flex-1 overflow-y-auto p-4 pb-24 md:pb-4 space-y-6">
+                    <div class="flex flex-col items-center">
+                        <div class="relative group cursor-pointer">
+                            <div id="settingsAvatarPreview" class="w-24 h-24 rounded-full bg-zinc-800 overflow-hidden ring-4 ring-zinc-800"></div>
+                            <label for="avatarInput" class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                                <i data-lucide="camera" class="w-8 h-8 text-white"></i>
+                            </label>
+                            <input type="file" id="avatarInput" class="hidden" accept="image/*">
+                        </div>
+                        <p class="text-xs text-zinc-500 mt-2">Click to change avatar</p>
+                    </div>
+
+                    <div class="space-y-4">
                         <div>
-                            <h3 id="chatName" style="font-weight:600; font-size:16px;">Name</h3>
-                            <div id="chatStatus" class="chat-status">offline</div>
+                            <label class="block text-xs font-medium text-zinc-400 mb-1">Display Name</label>
+                            <input type="text" id="settingsName" class="w-full bg-black/20 border border-white/5 rounded-xl py-2 px-3 text-sm text-white focus:outline-none focus:border-violet-500/50">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-zinc-400 mb-1">Status Message</label>
+                            <textarea id="settingsStatus" rows="2" class="w-full bg-black/20 border border-white/5 rounded-xl py-2 px-3 text-sm text-white focus:outline-none focus:border-violet-500/50 resize-none"></textarea>
+                        </div>
+                        <button id="saveProfileBtn" class="w-full bg-white/5 hover:bg-white/10 text-white font-medium py-2 rounded-xl transition-colors text-sm">Save Changes</button>
+                    </div>
+
+                    <div class="pt-6 border-t border-white/5">
+                        <button id="logoutBtn" class="w-full flex items-center justify-center gap-2 text-red-400 hover:bg-red-500/10 py-2 rounded-xl transition-colors text-sm font-medium">
+                            <i data-lucide="log-out" class="w-4 h-4"></i> Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Mobile Bottom Dock -->
+        <nav id="mobileDock" class="md:hidden fixed bottom-5 left-4 right-4 h-16 bg-zinc-900/80 backdrop-blur-2xl border border-white/10 rounded-2xl flex items-center justify-around px-2 z-40 shadow-2xl shadow-black/50 animate-slide-up ring-1 ring-white/5">
+            <button class="nav-item-mobile flex flex-col items-center justify-center w-12 h-12 rounded-xl text-white bg-white/10 transition-all duration-300 active:scale-90" data-tab="chats">
+                <i data-lucide="message-square" class="w-5 h-5 mb-0.5"></i>
+            </button>
+            <button class="nav-item-mobile flex flex-col items-center justify-center w-12 h-12 rounded-xl text-zinc-500 relative transition-all duration-300 active:scale-90" data-tab="friends">
+                <i data-lucide="users" class="w-5 h-5 mb-0.5"></i>
+                <div id="mobileFriendsBadge" class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full hidden"></div>
+            </button>
+            <button class="nav-item-mobile flex flex-col items-center justify-center w-12 h-12 rounded-xl text-zinc-500 transition-all duration-300 active:scale-90" data-tab="saved">
+                <i data-lucide="bookmark" class="w-5 h-5 mb-0.5"></i>
+            </button>
+             <button class="nav-item-mobile flex flex-col items-center justify-center w-12 h-12 rounded-xl text-zinc-500 transition-all duration-300 active:scale-90" data-tab="settings">
+                <i data-lucide="settings" class="w-5 h-5 mb-0.5"></i>
+            </button>
+        </nav>
+
+        <!-- Main Chat Area -->
+        <main class="flex-1 flex flex-col relative w-full min-w-0">
+            
+            <!-- Empty State -->
+            <div id="mainEmpty" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4 z-0">
+                <div class="w-20 h-20 bg-zinc-900/50 rounded-2xl flex items-center justify-center mb-4 transform rotate-6 border border-white/5">
+                    <i data-lucide="message-circle" class="w-10 h-10 text-zinc-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-zinc-200">Select a conversation</h3>
+                <p class="text-zinc-500 mt-2 max-w-xs">Choose a chat from the sidebar or find new friends to start messaging.</p>
+            </div>
+
+            <!-- Chat Container -->
+            <div id="chatContainer" class="flex flex-col h-full w-full hidden z-10 glass-heavy backdrop-blur-3xl">
+                
+                <!-- Chat Header -->
+                <header class="h-16 border-b border-white/5 flex items-center px-4 justify-between glass sticky top-0 z-20">
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <button id="backBtn" class="md:hidden p-2 -ml-2 text-zinc-400 hover:text-white">
+                            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                        </button>
+                        <div id="chatUserInfo" class="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity min-w-0">
+                            <div id="chatAvatar" class="w-10 h-10 rounded-full bg-zinc-800 flex-shrink-0"></div>
+                            <div class="min-w-0">
+                                <h3 id="chatName" class="font-bold text-sm truncate">User Name</h3>
+                                <p id="chatStatus" class="text-xs text-zinc-500 truncate">Online</p>
+                            </div>
                         </div>
                     </div>
-                    <div style="display:flex; gap:8px;">
-                        <button class="action-btn" onclick="toggleSearchInChat()">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg>
+                    <div class="flex items-center gap-2">
+                        <button id="callBtn" class="p-2 text-zinc-400 hover:text-violet-400 hover:bg-white/5 rounded-full transition-colors">
+                            <i data-lucide="phone" class="w-5 h-5"></i>
                         </button>
-                        <button class="action-btn" onclick="startCall()">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                        </button>
+                        <div class="relative">
+                            <button id="chatMenuBtn" class="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-full transition-colors">
+                                <i data-lucide="more-vertical" class="w-5 h-5"></i>
+                            </button>
+                            <!-- Dropdown -->
+                            <div id="chatDropdown" class="absolute right-0 top-full mt-2 w-48 bg-zinc-900 border border-white/10 rounded-xl shadow-xl hidden overflow-hidden z-50 glass">
+                                <button class="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-white/5 flex items-center gap-2">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i> Clear History
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </header>
 
-                <div class="panel-search hidden" id="inChatSearch" style="padding: 10px; margin: 0; background: var(--bg-card); border-bottom: 1px solid var(--border);">
-                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="top:22px;"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg>
-                     <input type="text" placeholder="Поиск в переписке..." oninput="searchMessages(this.value)">
+                <!-- Messages Area -->
+                <div id="messagesArea" class="flex-1 overflow-y-auto p-4 custom-scrollbar flex flex-col relative">
+                    <div class="absolute inset-0 pointer-events-none sticky top-0 h-4 z-10"></div>
+                    <div id="messagesList" class="flex-1"></div>
+                    <div id="typingIndicator" class="hidden px-4 py-2 text-xs text-zinc-500 italic flex items-center gap-1">
+                        <span>Typing</span>
+                        <span class="flex gap-0.5">
+                            <span class="w-1 h-1 bg-zinc-500 rounded-full animate-bounce" style="animation-delay: 0s"></span>
+                            <span class="w-1 h-1 bg-zinc-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></span>
+                            <span class="w-1 h-1 bg-zinc-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                        </span>
+                    </div>
                 </div>
 
-                <div class="messages-container" id="messagesList"></div>
-
-                <div class="input-area" style="position:relative;">
-                    <div id="recordingUI" class="hidden" style="position:absolute; inset:0; background:var(--bg-card); z-index:5; display:flex; align-items:center; justify-content:space-between; padding:0 20px;">
-                        <button class="action-btn" style="color:var(--danger);" onclick="cancelRecording()">
-                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                        </button>
-                        <span id="recordingTime" style="font-family:monospace; color:var(--danger); font-weight:600; font-size:18px;">00:00</span>
-                        <button class="action-btn" style="color:var(--success); background:var(--success-bg);" onclick="stopRecording()">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                        </button>
+                <!-- Input Area -->
+                <footer class="p-4 glass border-t border-white/5 relative">
+                    <!-- Emoji Picker -->
+                    <div id="emojiPicker" class="absolute bottom-full left-4 mb-2 glass border border-white/10 rounded-xl shadow-2xl w-72 h-80 hidden flex flex-col z-30">
+                        <div class="p-2 border-b border-white/5 flex gap-1 overflow-x-auto hide-scrollbar">
+                            <div class="text-xs font-medium text-zinc-400 px-2 py-1">Smileys</div>
+                        </div>
+                        <div id="emojiGrid" class="flex-1 overflow-y-auto p-2 grid grid-cols-7 gap-1 content-start"></div>
                     </div>
 
-                    <button class="action-btn" onclick="document.getElementById('fileInput').click()">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
-                    </button>
-                    <input type="file" id="fileInput" hidden accept="image/*">
-                    
-                    <div class="input-wrapper">
-                        <textarea id="msgInput" class="message-input" rows="1" placeholder="Сообщение..." oninput="handleInput(this)"></textarea>
+                    <div class="flex items-end gap-2 bg-black/20 p-2 rounded-2xl border border-white/5">
+                        <button id="attachBtn" class="p-2 text-zinc-400 hover:text-white rounded-xl hover:bg-white/5 transition-colors flex-shrink-0">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                        </button>
+                        <input type="file" id="fileInput" class="hidden" accept="image/*">
+                        
+                        <div class="flex-1 min-w-0 py-2">
+                            <input type="text" id="messageInput" class="w-full bg-transparent text-white placeholder-zinc-500 focus:outline-none text-sm max-h-32" placeholder="Type a message..." autocomplete="off">
+                        </div>
+
+                        <button id="emojiBtn" class="p-2 text-zinc-400 hover:text-yellow-400 rounded-xl hover:bg-white/5 transition-colors flex-shrink-0">
+                            <i data-lucide="smile" class="w-5 h-5"></i>
+                        </button>
+                        
+                        <button id="sendBtn" class="p-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl shadow-lg shadow-violet-600/20 transition-all transform hover:scale-105 flex-shrink-0">
+                            <i data-lucide="send" class="w-5 h-5"></i>
+                        </button>
                     </div>
+                </footer>
+            </div>
+            
+            <!-- User Profile View (Sidebar overlay) -->
+            <div id="userProfileView" class="hidden absolute top-0 right-0 h-full w-full md:w-80 bg-zinc-900/95 backdrop-blur-xl border-l border-white/5 z-[60] flex flex-col shadow-2xl transform transition-transform animate-slide-in-right">
+                <div class="p-4 border-b border-white/5 flex items-center justify-between">
+                    <h3 class="font-bold">Contact Info</h3>
+                    <button id="closeProfileBtn" class="text-zinc-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <div class="p-6 flex flex-col items-center">
+                    <div id="profileViewAvatar" class="w-24 h-24 rounded-full bg-zinc-800 mb-4"></div>
+                    <h2 id="profileViewName" class="text-xl font-bold text-center">User Name</h2>
+                    <p id="profileViewStatus" class="text-sm text-zinc-400 text-center mt-2">No status</p>
                     
-                    <button class="voice-btn" id="voiceBtn" onclick="startRecording()">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
-                    </button>
-                    <button class="send-btn hidden" id="sendBtn" onclick="sendMessage('text')">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                    </button>
+                    <div class="flex gap-4 mt-6 w-full justify-center">
+                        <div class="text-center">
+                            <div class="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-1">
+                                <i data-lucide="message-square" class="w-5 h-5 text-zinc-400"></i>
+                            </div>
+                            <span class="text-xs text-zinc-500">Message</span>
+                        </div>
+                         <div class="text-center">
+                            <div class="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-1">
+                                <i data-lucide="bell" class="w-5 h-5 text-zinc-400"></i>
+                            </div>
+                            <span class="text-xs text-zinc-500">Mute</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 border-t border-white/5 flex-1">
+                    <h4 class="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Media</h4>
+                    <div class="grid grid-cols-3 gap-2 opacity-50 text-xs text-center py-4">
+                        No shared media
+                    </div>
                 </div>
             </div>
+
         </main>
     </div>
 
-    <!-- Modals -->
-    <div class="modal-overlay" id="groupModal">
-        <div class="modal-card">
-            <h2 style="font-size:20px; font-weight:700; margin-bottom:20px;">Создать группу</h2>
-            <input type="text" id="groupName" placeholder="Название группы" class="auth-input">
-            <div style="margin-bottom:10px; font-weight:600;">Участники:</div>
-            <div id="groupUserList" style="max-height:200px; overflow-y:auto; margin-bottom:20px; border:1px solid var(--border); border-radius:12px;"></div>
-            <div style="display:flex; justify-content:flex-end; gap:10px;">
-                <button class="auth-input" style="width:auto; background:transparent; color:var(--text-primary);" onclick="$('groupModal').classList.remove('open')">Отмена</button>
-                <button class="auth-input" style="width:auto; background:var(--primary); color:white;" onclick="createGroup()">Создать</button>
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-[100] flex flex-col items-end pointer-events-none [&>*]:pointer-events-auto"></div>
+
+    <!-- Context Menu -->
+    <div id="messageContextMenu" class="hidden fixed glass border border-white/10 rounded-xl shadow-2xl z-50 w-48 overflow-hidden py-1">
+        <button data-action="reply" class="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 flex items-center gap-2">
+            <i data-lucide="reply" class="w-4 h-4"></i> Reply
+        </button>
+        <button data-action="copy" class="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 flex items-center gap-2">
+            <i data-lucide="copy" class="w-4 h-4"></i> Copy Text
+        </button>
+        <button data-action="save" class="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 flex items-center gap-2">
+            <i data-lucide="bookmark" class="w-4 h-4"></i> Save
+        </button>
+        <div class="h-px bg-white/5 my-1"></div>
+        <button data-action="edit" class="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 flex items-center gap-2">
+            <i data-lucide="edit-2" class="w-4 h-4"></i> Edit
+        </button>
+        <button data-action="delete" class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-2">
+            <i data-lucide="trash" class="w-4 h-4"></i> Delete
+        </button>
+    </div>
+
+    <!-- Image Viewer -->
+    <div id="imageViewer" class="hidden fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4">
+        <button id="closeImageViewer" class="absolute top-4 right-4 p-2 text-white/50 hover:text-white bg-white/10 rounded-full">
+            <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+        <img id="imageViewerImg" src="" class="max-w-full max-h-full rounded-lg shadow-2xl">
+    </div>
+
+    <!-- Incoming Call Modal -->
+    <div id="incomingCall" class="hidden fixed inset-0 z-[100] bg-black/80 flex items-center justify-center backdrop-blur-sm glass-heavy">
+        <div class="bg-zinc-900/50 p-8 rounded-3xl shadow-2xl border border-white/10 flex flex-col items-center max-w-sm w-full">
+            <div id="callAvatar" class="w-24 h-24 rounded-full bg-zinc-800 mb-4 overflow-hidden"></div>
+            <h3 id="callerName" class="text-2xl font-bold text-white mb-1">Caller Name</h3>
+            <p class="text-zinc-400 animate-pulse mb-8">Incoming Call...</p>
+            <div class="flex gap-8">
+                <button id="declineCallBtn" class="w-16 h-16 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all transform hover:scale-110">
+                    <i data-lucide="phone-off" class="w-8 h-8"></i>
+                </button>
+                <button id="acceptCallBtn" class="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-all transform hover:scale-110">
+                    <i data-lucide="phone" class="w-8 h-8"></i>
+                </button>
             </div>
+            <button id="endCallBtn" class="hidden mt-4 text-red-500">End Call</button>
+            <div id="callStatusText" class="hidden"></div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile as updateAuthProfile } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getDatabase, ref, push, set, get, update, remove, onValue, off, onDisconnect, serverTimestamp, query, limitToLast } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
-        const config = {
+        // ==================== FIREBASE CONFIG ====================
+        const firebaseConfig = {
             apiKey: "AIzaSyCr9Dejkc-LsxGPxZaY7UBiJ1LdZHlhaos",
             authDomain: "flux-messenger-9afab.firebaseapp.com",
             databaseURL: "https://flux-messenger-9afab-default-rtdb.firebaseio.com",
@@ -387,424 +533,1320 @@
             appId: "1:268837058726:web:ce018384e9b34a2a4edc67"
         };
 
-        const app = initializeApp(config);
+        const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getDatabase(app);
+        const database = getDatabase(app);
+
+        // ==================== STATE ====================
+        let currentUser = null;
+        let userData = null;
+        let currentChatId = null;
+        let currentChatUserId = null;
+        let allUsers = {};
+        let friends = {};
+        let friendRequests = {};
+        let sentRequests = {};
+        let chats = {};
+        let savedMessages = {};
+        let replyingTo = null;
+        let editingMessage = null;
+        let typingTimeout = null;
+        let activeCall = null;
+        let callTimer = null;
+        let callSeconds = 0;
+
+        // Unsubscribers
+        const unsubscribers = [];
+        let messagesUnsubscribe = null;
+        let typingUnsubscribe = null;
+
+        // Avatar gradients for Tailwind
+        const avatarColors = [
+            'bg-gradient-to-br from-pink-400 to-rose-500',
+            'bg-gradient-to-br from-violet-400 to-purple-500',
+            'bg-gradient-to-br from-cyan-400 to-blue-500',
+            'bg-gradient-to-br from-emerald-400 to-green-500',
+            'bg-gradient-to-br from-amber-400 to-orange-500',
+            'bg-gradient-to-br from-fuchsia-400 to-pink-500',
+            'bg-gradient-to-br from-indigo-400 to-cyan-500'
+        ];
+
+        // Emojis
+        const emojiCategories = {
+            smileys: ['😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '😉', '😌', '😍', '🥰', '😘', '😗', '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '😮', '🤯', '😱', '🥵', '🥶', '😳', '🤪', '😵', '🥴', '😠', '😡', '🤬', '😈', '👿', '💀', '☠️', '💩', '🤡', '👹', '👺', '👻', '👽', '👾', '🤖'],
+            gestures: ['👋', '🤚', '🖐', '✋', '🖖', '👌', '🤌', '🤏', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '✍️', '💪', '🦾', '🦿', '🦵', '🦶', '👂', '🦻', '👃', '🧠', '🫀', '🫁', '🦷', '🦴', '👀', '👁', '👅', '👄'],
+            hearts: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '♥️', '❤️‍🔥', '❤️‍🩹', '💑', '💏', '👨‍❤️‍👨', '👩‍❤️‍👩', '👨‍❤️‍👨'],
+            animals: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐻‍❄️', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐵', '🙉', '🙊', '🐔', '🐧', '🐦', '🐤', '🦆', '🦅', '🦉', '🦇', '🐺', '🐗', '🐴', '🦄', '🐝', '🪱', '🐛', '🦋', '🐌', '🐞', '🐜', '🪰', '🪲', '🪳', '🦟', '🦗', '🕷', '🦂', '🐢', '🐍', '🦎', '🦖', '🦕', '🐙', '🦑', '🦐', '🦞', '🦀', '🐡', '🐠', '🐟', '🐬', '🐳', '🐋', '🦈', '🐊']
+        };
+
+        // ==================== DOM HELPERS ====================
         const $ = id => document.getElementById(id);
 
-        let currentUser = null;
-        let users = {};
-        let chats = {};
-        let activeChatId = null;
-        let activeChat = null;
-        let typingTimeout = null;
-        let mediaRecorder = null;
-        let audioChunks = [];
-        let timerInt = null;
-
-        // Init & Loading Fix
-        createSnow();
-        
-        // Safety timeout to hide loading screen
-        setTimeout(() => {
-            const ls = $('loadingScreen');
-            if(ls) ls.classList.add('fade-out');
-        }, 3000);
-
-        onAuthStateChanged(auth, user => {
-            $('loadingScreen').classList.add('fade-out');
+        function showToast(message, type = 'info') {
+            const container = $('toastContainer');
+            const toast = document.createElement('div');
             
-            if (user) {
-                currentUser = user;
-                $('authScreen').classList.add('hidden');
-                $('appScreen').classList.remove('hidden');
-                setupPresence();
-                loadData();
-            } else {
-                currentUser = null;
-                $('authScreen').classList.remove('hidden');
-                $('appScreen').classList.add('hidden');
-            }
-        });
+            // Tailwind classes for toast
+            let colors = 'bg-zinc-800 text-white border border-white/10';
+            if (type === 'success') colors = 'bg-emerald-600/90 text-white backdrop-blur-sm shadow-emerald-900/20 shadow-lg';
+            if (type === 'error') colors = 'bg-red-600/90 text-white backdrop-blur-sm shadow-red-900/20 shadow-lg';
+            if (type === 'warning') colors = 'bg-amber-500/90 text-black backdrop-blur-sm';
 
-        // UI Logic
-        window.switchTab = (tab) => {
-            document.querySelectorAll('.list-panel').forEach(p => p.classList.add('hidden'));
-            $(`panel-${tab}`).classList.remove('hidden');
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            if(tab === 'chats') document.querySelectorAll('.nav-item')[0].classList.add('active');
-            if(tab === 'users') document.querySelectorAll('.nav-item')[1].classList.add('active');
-            if(tab === 'settings') document.querySelectorAll('.nav-item')[2].classList.add('active');
-        };
+            toast.className = `p-4 rounded-xl shadow-2xl mb-3 text-sm font-medium animate-fade-in ${colors}`;
+            toast.textContent = message;
+            container.appendChild(toast);
 
-        window.toggleSnow = (v) => $('snowContainer').style.display = v ? 'block' : 'none';
-        window.toggleTheme = (v) => document.body.setAttribute('data-theme', v ? 'dark' : 'christmas');
-        function createSnow() {
-            const c = $('snowContainer');
-            for(let i=0; i<30; i++) {
-                const s = document.createElement('div');
-                s.className = 'snowflake';
-                s.innerHTML = '❄';
-                s.style.left = Math.random()*100+'vw';
-                s.style.animationDuration = (Math.random()*3+2)+'s';
-                s.style.fontSize = (Math.random()*10+10)+'px';
-                c.appendChild(s);
-            }
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
 
-        // Auth
-        $('loginForm').onsubmit = async e => {
-            e.preventDefault();
-            const email = $('email').value;
-            const pw = $('password').value;
-            const isRegister = $('toggleAuth').textContent === 'Войти';
-            
-            try {
-                if (isRegister) {
-                    const cred = await createUserWithEmailAndPassword(auth, email, pw);
-                    await updateAuthProfile(cred.user, { displayName: email.split('@')[0] });
-                    await set(ref(db, `users/${cred.user.uid}`), {
-                        name: email.split('@')[0], email,
-                        avatarColor: 'avatar-'+(Math.floor(Math.random()*5)+1),
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function formatTime(date) {
+            if (!date) return '';
+            const d = new Date(date);
+            return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function formatDate(date) {
+            if (!date) return '';
+            const d = new Date(date);
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+
+            if (d.toDateString() === today.toDateString()) return 'Today';
+            if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+            return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+        }
+
+        function formatLastSeen(timestamp) {
+            if (!timestamp) return 'Last seen recently';
+            const now = Date.now();
+            const diff = now - timestamp;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return 'Online';
+            if (minutes < 5) return 'Just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            if (days < 7) return `${days}d ago`;
+            return 'Long ago';
+        }
+
+        function isOnline(user) {
+            if (!user) return false;
+            if (user.online === true) return true;
+            if (!user.lastSeen) return false;
+            return (Date.now() - user.lastSeen) < 120000;
+        }
+
+        function getErrorMessage(code) {
+            const messages = {
+                'auth/email-already-in-use': 'Email already in use',
+                'auth/invalid-email': 'Invalid email format',
+                'auth/weak-password': 'Password too weak',
+                'auth/user-not-found': 'User not found',
+                'auth/wrong-password': 'Wrong password',
+                'auth/invalid-credential': 'Invalid credentials'
+            };
+            return messages[code] || 'An error occurred';
+        }
+
+        // ==================== INIT ====================
+        function init() {
+            setupAuthListeners();
+            setupEventListeners();
+            setupEmojiPicker();
+
+            onAuthStateChanged(auth, async (user) => {
+                $('loadingScreen').classList.add('hidden');
+                
+                if (user) {
+                    currentUser = user;
+                    await loadUserData();
+                    showAppScreen();
+                    setupPresence();
+                    subscribeToData();
+                    showToast(`Welcome back, ${userData?.name || 'User'}!`, 'success');
+                } else {
+                    currentUser = null;
+                    userData = null;
+                    showAuthScreen();
+                    unsubscribeAll();
+                }
+            });
+        }
+
+        // ==================== AUTH ====================
+        function setupAuthListeners() {
+            $('showRegister').addEventListener('click', () => {
+                $('loginForm').classList.add('hidden');
+                $('registerForm').classList.remove('hidden');
+            });
+
+            $('showLogin').addEventListener('click', () => {
+                $('registerForm').classList.add('hidden');
+                $('loginForm').classList.remove('hidden');
+            });
+
+            $('loginForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = $('loginEmail').value.trim();
+                const password = $('loginPassword').value;
+                
+                const btn = $('loginBtn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>';
+                btn.disabled = true;
+                
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } catch (error) {
+                    showToast(getErrorMessage(error.code), 'error');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            });
+
+            $('registerForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = $('registerName').value.trim();
+                const email = $('registerEmail').value.trim();
+                const password = $('registerPassword').value;
+                
+                const btn = $('registerBtn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>';
+                btn.disabled = true;
+                
+                try {
+                    const cred = await createUserWithEmailAndPassword(auth, email, password);
+                    await updateProfile(cred.user, { displayName: name });
+                    
+                    const avatarColor = avatarColors[Math.floor(Math.random() * avatarColors.length)];
+                    
+                    await set(ref(database, `users/${cred.user.uid}`), {
+                        name,
+                        email,
+                        avatarColor,
+                        status: 'Hello! I am using Flux',
+                        avatar: null,
+                        createdAt: serverTimestamp(),
+                        lastSeen: serverTimestamp(),
                         online: true
                     });
-                } else {
-                    await signInWithEmailAndPassword(auth, email, pw);
-                }
-            } catch(err) {
-                showToast(err.message);
-            }
-        };
-        $('toggleAuth').onclick = function() {
-            const isReg = this.textContent === 'Создать аккаунт';
-            this.textContent = isReg ? 'Войти' : 'Создать аккаунт';
-            $('loginForm').querySelector('button[type="submit"]').textContent = isReg ? 'Зарегистрироваться' : 'Войти';
-        };
-        window.logout = () => signOut(auth);
-
-        // Data
-        function setupPresence() {
-            const uRef = ref(db, `users/${currentUser.uid}`);
-            onValue(ref(db, '.info/connected'), snap => {
-                if (snap.val()) {
-                    onDisconnect(uRef).update({ online: false, lastSeen: serverTimestamp() });
-                    update(uRef, { online: true });
+                } catch (error) {
+                    showToast(getErrorMessage(error.code), 'error');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
                 }
             });
-        }
-        function loadData() {
-            onValue(ref(db, 'users'), s => { users = s.val() || {}; renderUsers(); renderChats(); });
-            onValue(ref(db, `user-chats/${currentUser.uid}`), s => { chats = s.val() || {}; renderChats(); });
-            
-            get(ref(db, `users/${currentUser.uid}`)).then(s => {
-                const u = s.val();
-                $('myAvatar').textContent = u.name[0];
-                $('myAvatar').className = `item-avatar ${u.avatarColor}`;
-                $('settingsName').value = u.name;
-                $('settingsStatus').value = u.status || '';
-            });
-        }
 
-        // Rendering
-        function renderUsers() {
-            const list = $('usersList');
-            list.innerHTML = '';
-            Object.entries(users).forEach(([uid, u]) => {
-                if (uid === currentUser.uid) return;
-                const el = document.createElement('div');
-                el.className = 'list-item';
-                el.innerHTML = `
-                    <div class="item-avatar ${u.avatarColor || 'avatar-1'}">
-                        <img src="https://cdn-icons-png.flaticon.com/512/744/744546.png" class="santa-hat">
-                        ${u.name[0]}
-                        ${u.online ? '<div class="online-dot"></div>' : ''}
-                    </div>
-                    <div class="item-content">
-                        <div class="item-name">${u.name}</div>
-                        <div class="item-preview">${u.status || 'Happy New Year!'}</div>
-                    </div>
-                `;
-                el.onclick = () => openChat(uid);
-                list.appendChild(el);
-            });
-            
-            const gList = $('groupUserList');
-            gList.innerHTML = '';
-            Object.entries(users).forEach(([uid, u]) => {
-                if (uid === currentUser.uid) return;
-                const d = document.createElement('div');
-                d.style.padding = '8px';
-                d.style.display = 'flex';
-                d.style.alignItems = 'center';
-                d.innerHTML = `<input type="checkbox" value="${uid}" style="margin-right:10px;"> ${u.name}`;
-                gList.appendChild(d);
-            });
-        }
-
-        function renderChats() {
-            const list = $('chatsList');
-            list.innerHTML = '';
-            const sorted = Object.entries(chats).sort((a,b) => b[1].timestamp - a[1].timestamp);
-            let totalUnread = 0;
-            
-            sorted.forEach(([id, c]) => {
-                const u = users[id] || { name: c.name || 'Group', avatarColor: 'avatar-1' };
-                const isGroup = !!c.name;
-                
-                const el = document.createElement('div');
-                el.className = `list-item ${activeChatId === id ? 'active' : ''}`;
-                
-                const time = c.timestamp ? new Date(c.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
-                const unread = c.unread ? `<div style="background:var(--primary); color:white; font-size:10px; padding:2px 6px; border-radius:10px;">${c.unread}</div>` : '';
-                totalUnread += (c.unread || 0);
-
-                el.innerHTML = `
-                    <div class="item-avatar ${u.avatarColor || 'avatar-1'}">
-                        ${!isGroup ? '<img src="https://cdn-icons-png.flaticon.com/512/744/744546.png" class="santa-hat">' : ''}
-                        ${isGroup ? 'G' : u.name[0]}
-                        ${u.online ? '<div class="online-dot"></div>' : ''}
-                    </div>
-                    <div class="item-content">
-                        <div class="item-top"><span class="item-name">${isGroup ? c.name : u.name}</span><span class="item-time">${time}</span></div>
-                        <div class="item-top"><span class="item-preview">${c.lastMessage || 'Нет сообщений'}</span>${unread}</div>
-                    </div>
-                `;
-                el.onclick = () => openChat(id, isGroup);
-                list.appendChild(el);
+            $('logoutBtn').addEventListener('click', async () => {
+                if (currentUser) {
+                    await update(ref(database, `users/${currentUser.uid}`), {
+                        online: false,
+                        lastSeen: serverTimestamp()
+                    });
+                }
+                await signOut(auth);
             });
 
-            const badge = $('globalUnread');
-            badge.textContent = totalUnread;
-            if(totalUnread > 0) badge.classList.remove('hidden'); else badge.classList.add('hidden');
-        }
-
-        // Chat
-        window.openChat = async (id, isGroup = false) => {
-            activeChatId = id;
-            activeChat = isGroup ? { ...chats[id], id } : users[id];
-            
-            $('emptyState').classList.add('hidden');
-            $('chatView').classList.remove('hidden');
-            $('mainArea').classList.add('open');
-            
-            $('chatName').textContent = isGroup ? activeChat.name : activeChat.name;
-            $('chatAvatar').textContent = isGroup ? 'G' : activeChat.name[0];
-            $('chatAvatar').className = `item-avatar ${activeChat.avatarColor || 'avatar-1'}`;
-            
-            if(!isGroup) {
-                const last = activeChat.online ? 'Online' : 'Offline';
-                $('chatStatus').textContent = last;
-                $('chatStatus').className = `chat-status ${activeChat.online ? 'online' : ''}`;
-                
-                const typeRef = ref(db, `typing/${getChatId(id)}/${id}`);
-                onValue(typeRef, s => {
-                    if(s.val()) {
-                        $('chatStatus').textContent = 'Typing...';
-                        $('chatStatus').classList.add('typing');
-                    } else {
-                        $('chatStatus').textContent = activeChat.online ? 'Online' : 'Offline';
-                        $('chatStatus').classList.remove('typing');
+            document.querySelectorAll('.toggle-password').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = btn.dataset.target;
+                    const input = document.getElementById(targetId);
+                    if (input) {
+                        input.type = input.type === 'password' ? 'text' : 'password';
                     }
                 });
-            } else {
-                $('chatStatus').textContent = 'Group';
-            }
-
-            update(ref(db, `user-chats/${currentUser.uid}/${id}`), { unread: 0 });
-
-            const chatId = isGroup ? id : getChatId(id);
-            onValue(query(ref(db, `messages/${chatId}`), limitToLast(50)), snap => {
-                const msgs = [];
-                snap.forEach(c => msgs.push({key:c.key, ...c.val()}));
-                renderMessages(msgs);
             });
-            
-            renderChats();
-        };
-
-        function getChatId(uid) { return [currentUser.uid, uid].sort().join('_'); }
-
-        function renderMessages(msgs) {
-            const list = $('messagesList');
-            list.innerHTML = '';
-            msgs.forEach(m => {
-                const div = document.createElement('div');
-                const own = m.sender === currentUser.uid;
-                div.className = `message-group ${own ? 'own' : ''}`;
-                div.ondblclick = () => toggleReaction(activeChatId, m.key, own);
-                
-                let content = '';
-                if(m.type === 'text') content = `<div class="message-bubble">${m.text}</div>`;
-                if(m.type === 'image') content = `<img src="${m.content}" class="message-image" onclick="window.open(this.src)">`;
-                if(m.type === 'audio') content = `<div class="message-bubble" onclick="playAudio('${m.content}')">▶ Audio Message</div>`;
-                
-                const reaction = m.reaction ? `<div style="position:absolute; bottom:-10px; ${own?'left:0':'right:0'}; background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:2px 5px; font-size:12px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">❤️</div>` : '';
-                const time = new Date(m.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-                const tick = own ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="tick ${m.read ? 'read' : ''}"><polyline points="20 6 9 17 4 12"></polyline></svg>` : '';
-                
-                div.innerHTML = `${content}${reaction}<div class="message-meta">${time}${tick}</div>`;
-                list.appendChild(div);
-            });
-            list.scrollTop = list.scrollHeight;
         }
 
-        window.sendMessage = async (type, content) => {
-            const txt = $('msgInput').value.trim();
-            if(!txt && !content) return;
-            
-            const chatId = activeChat.name ? activeChatId : getChatId(activeChatId);
-            
-            const msg = {
-                sender: currentUser.uid,
-                text: type === 'text' ? txt : (type === 'audio' ? 'Voice' : 'Image'),
-                type,
-                content: content || null,
-                timestamp: serverTimestamp(),
-                read: false
-            };
-            
-            await push(ref(db, `messages/${chatId}`), msg);
-            
-            const updates = {};
-            updates[`user-chats/${currentUser.uid}/${activeChatId}`] = {
-                lastMessage: msg.text, timestamp: serverTimestamp(), unread: 0,
-                ...(activeChat.name ? { name: activeChat.name } : {})
-            };
-            
-            if (activeChat.name) {
-                // Simplified group fanout
-            } else {
-                const recipientPath = `user-chats/${activeChatId}/${currentUser.uid}`;
-                get(ref(db, recipientPath)).then(s => {
-                    const u = s.val()?.unread || 0;
-                    update(ref(db, recipientPath), {
-                        lastMessage: msg.text, timestamp: serverTimestamp(), unread: u + 1
+        function showAuthScreen() {
+            $('authScreen').classList.remove('hidden');
+            $('appScreen').classList.add('hidden');
+        }
+
+        function showAppScreen() {
+            $('authScreen').classList.add('hidden');
+            $('appScreen').classList.remove('hidden');
+            updateUserUI();
+        }
+
+        // ==================== USER DATA ====================
+        async function loadUserData() {
+            if (!currentUser) return;
+
+            const snapshot = await get(ref(database, `users/${currentUser.uid}`));
+            if (snapshot.exists()) {
+                userData = snapshot.val();
+                await update(ref(database, `users/${currentUser.uid}`), {
+                    online: true,
+                    lastSeen: serverTimestamp()
+                });
+            }
+        }
+
+        function setupPresence() {
+            if (!currentUser) return;
+            const userRef = ref(database, `users/${currentUser.uid}`);
+            const connectedRef = ref(database, '.info/connected');
+
+            onValue(connectedRef, (snap) => {
+                if (snap.val() === true) {
+                    update(userRef, { online: true, lastSeen: serverTimestamp() });
+                    onDisconnect(userRef).update({ online: false, lastSeen: serverTimestamp() });
+                }
+            });
+
+            setInterval(() => {
+                if (currentUser) {
+                    update(ref(database, `users/${currentUser.uid}`), {
+                        online: true,
+                        lastSeen: serverTimestamp()
                     });
+                }
+            }, 30000);
+            
+            document.addEventListener('visibilitychange', () => {
+                if (currentUser) {
+                    update(ref(database, `users/${currentUser.uid}`), {
+                        online: !document.hidden,
+                        lastSeen: serverTimestamp()
+                    });
+                }
+            });
+        }
+
+        function updateUserUI() {
+            if (!userData) return;
+            const nav = $('navAvatar');
+            if (userData.avatar) {
+                nav.innerHTML = `<img src="${userData.avatar}" class="w-full h-full object-cover" alt="">`;
+                nav.className = 'w-10 h-10 rounded-full overflow-hidden ring-2 ring-white/10 hover:ring-white/30 transition-all cursor-pointer';
+            } else {
+                nav.innerHTML = userData.name?.[0]?.toUpperCase() || '?';
+                nav.className = `w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-lg ${userData.avatarColor || avatarColors[0]} ring-2 ring-white/10 hover:ring-white/30 transition-all cursor-pointer`;
+            }
+            loadSettings();
+        }
+
+        // ==================== SUBSCRIPTIONS ====================
+        function subscribeToData() {
+            subscribeToUsers();
+            subscribeToFriends();
+            subscribeToFriendRequests();
+            subscribeToSentRequests();
+            subscribeToChats();
+            subscribeToSaved();
+            subscribeToCalls();
+        }
+
+        function unsubscribeAll() {
+            unsubscribers.forEach(fn => typeof fn === 'function' && fn());
+            unsubscribers.length = 0;
+            if (messagesUnsubscribe) messagesUnsubscribe();
+            if (typingUnsubscribe) typingUnsubscribe();
+        }
+
+        function subscribeToUsers() {
+            const usersRef = ref(database, 'users');
+            const unsub = onValue(usersRef, (snapshot) => {
+                allUsers = {};
+                snapshot.forEach((child) => {
+                    allUsers[child.key] = { id: child.key, ...child.val() };
+                });
+                renderUsersList();
+                updateChatsList();
+                if (currentChatUserId && allUsers[currentChatUserId]) {
+                    updateChatHeader(currentChatUserId);
+                    updateMessageAvatars();
+                }
+            });
+            unsubscribers.push(() => off(usersRef));
+        }
+
+        function subscribeToFriends() {
+            if (!currentUser) return;
+            const friendsRef = ref(database, `friends/${currentUser.uid}`);
+            const unsub = onValue(friendsRef, (snapshot) => {
+                friends = {};
+                snapshot.forEach((child) => { friends[child.key] = child.val(); });
+                renderFriendsList(getCurrentFriendTab());
+                updateChatsList();
+            });
+            unsubscribers.push(() => off(friendsRef));
+        }
+
+        function subscribeToFriendRequests() {
+            if (!currentUser) return;
+            const requestsRef = ref(database, `friendRequests/${currentUser.uid}`);
+            const unsub = onValue(requestsRef, (snapshot) => {
+                friendRequests = {};
+                snapshot.forEach((child) => { friendRequests[child.key] = child.val(); });
+                
+                const count = Object.keys(friendRequests).length;
+                const badge = $('requestsCount');
+                const navBadge = $('friendsBadge');
+                const mobileBadge = $('mobileFriendsBadge');
+                
+                if (count > 0) {
+                    if (badge) { badge.textContent = count; badge.classList.remove('hidden'); }
+                    if (navBadge) { navBadge.classList.remove('hidden'); }
+                    if (mobileBadge) { mobileBadge.classList.remove('hidden'); }
+                } else {
+                    if (badge) { badge.classList.add('hidden'); }
+                    if (navBadge) { navBadge.classList.add('hidden'); }
+                    if (mobileBadge) { mobileBadge.classList.add('hidden'); }
+                }
+                
+                // Re-render if we are on the requests tab
+                if (getCurrentFriendTab() === 'requests') {
+                    renderFriendsList('requests');
+                }
+            });
+            unsubscribers.push(() => off(requestsRef));
+        }
+
+        function subscribeToSentRequests() {
+            if (!currentUser) return;
+            const sentRef = ref(database, `sentRequests/${currentUser.uid}`);
+            const unsub = onValue(sentRef, (snapshot) => {
+                sentRequests = {};
+                snapshot.forEach((child) => { sentRequests[child.key] = child.val(); });
+                // Refresh user list to update button states
+                renderUsersList();
+            });
+            unsubscribers.push(() => off(sentRef));
+        }
+
+        function subscribeToChats() {
+            if (!currentUser) return;
+            const chatsRef = ref(database, `userChats/${currentUser.uid}`);
+            const unsub = onValue(chatsRef, (snapshot) => {
+                chats = {};
+                snapshot.forEach((child) => { chats[child.key] = child.val(); });
+                updateChatsList();
+            });
+            unsubscribers.push(() => off(chatsRef));
+        }
+
+        function subscribeToSaved() {
+            if (!currentUser) return;
+            const savedRef = ref(database, `saved/${currentUser.uid}`);
+            const unsub = onValue(savedRef, (snapshot) => {
+                savedMessages = {};
+                snapshot.forEach((child) => { savedMessages[child.key] = { id: child.key, ...child.val() }; });
+                renderSavedMessages();
+            });
+            unsubscribers.push(() => off(savedRef));
+        }
+
+        function updateMessageAvatars() {
+            // Helper to refresh avatars in the message list if they change
+            const container = $('messagesList');
+            if (!container) return;
+            // We can just re-render
+            // But currently renderMessages is called by the message subscription, which isn't triggered by user updates.
+            // For simplicity, we won't force re-render messages on every user update to avoid jitter, 
+            // but the next message will have the new avatar.
+        }
+
+        // ==================== RENDERING ====================
+        function renderUsersList() {
+            const search = $('searchUsers')?.value?.toLowerCase() || '';
+            const container = $('searchResults');
+            if (!container) return;
+
+            // FIX: Empty search check
+            if (!search) {
+                container.innerHTML = `<div class="flex flex-col items-center justify-center h-64 text-zinc-500"><i data-lucide="search" class="w-8 h-8 mb-2 opacity-50"></i><p>Start typing to find people...</p></div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            const list = Object.values(allUsers)
+                .filter(u => u.id !== currentUser?.uid && u.name?.toLowerCase().includes(search));
+
+            if (list.length === 0) {
+                container.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-zinc-500"><i data-lucide="search" class="w-8 h-8 mb-2 opacity-50"></i><p>No users found</p></div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = list.map(user => {
+                const isFriend = friends[user.id];
+                const isRequestSent = sentRequests[user.id];
+                const online = isOnline(user);
+                const avatarClass = user.avatar ? 'w-10 h-10 rounded-full object-cover' : `w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${user.avatarColor || avatarColors[0]}`;
+                const avatarContent = user.avatar ? `<img src="${user.avatar}" class="w-full h-full object-cover">` : (user.name?.[0]?.toUpperCase() || '?');
+
+                let actionButton = '';
+                if (!isFriend) {
+                    if (isRequestSent) {
+                        actionButton = `<button class="p-2 bg-white/5 rounded-full text-zinc-500 cursor-not-allowed" disabled><i data-lucide="check" class="w-4 h-4"></i></button>`;
+                    } else {
+                        actionButton = `<button class="p-2 bg-white/5 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white transition-colors" data-action="add-friend" data-id="${user.id}"><i data-lucide="user-plus" class="w-4 h-4"></i></button>`;
+                    }
+                }
+
+                return `
+                    <div class="flex items-center p-3 rounded-xl hover:bg-white/5 cursor-pointer transition-colors group mb-1" data-user-id="${user.id}">
+                        <div class="${avatarClass} relative flex-shrink-0">
+                            ${avatarContent}
+                            ${online ? '<div class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-zinc-900 rounded-full"></div>' : ''}
+                        </div>
+                        <div class="ml-3 flex-1 min-w-0">
+                            <div class="font-medium text-zinc-200 truncate">${escapeHtml(user.name)}</div>
+                            <div class="text-xs text-zinc-500 truncate">${online ? 'Online' : formatLastSeen(user.lastSeen)}</div>
+                        </div>
+                        ${actionButton}
+                    </div>
+                `;
+            }).join('');
+
+            container.querySelectorAll('[data-action]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const icon = btn.querySelector('i');
+                    btn.disabled = true;
+                    btn.classList.add('cursor-not-allowed', 'text-zinc-500');
+                    btn.classList.remove('hover:bg-white/10', 'hover:text-white', 'text-zinc-400');
+                    // Change icon to loading or check
+                    btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i>`;
+                    lucide.createIcons();
+                    sendFriendRequest(btn.dataset.id);
+                });
+            });
+            
+            container.querySelectorAll('.group').forEach(item => {
+                item.addEventListener('click', () => {
+                     const userId = item.dataset.userId;
+                     if (friends[userId]) openChat(userId);
+                     else showUserProfile(userId);
+                });
+            });
+            lucide.createIcons();
+        }
+
+        function getCurrentFriendTab() {
+            const activeBtn = document.querySelector('.panel-tab.bg-white\\/10'); // Escaped slash
+            return activeBtn ? activeBtn.dataset.friendsTab : 'all';
+        }
+
+        function renderFriendsList(tab) {
+            let list = [];
+            if (tab === 'requests') {
+                list = Object.entries(friendRequests).map(([id, data]) => ({ id, ...data, isRequest: true }));
+            } else {
+                list = Object.keys(friends).map(id => allUsers[id]).filter(Boolean);
+                if (tab === 'online') list = list.filter(u => isOnline(u));
+            }
+
+            const container = $('friendsList');
+            if (!container) return;
+            
+            // Add Fade In Animation Reset
+            container.classList.remove('animate-fade-in');
+            void container.offsetWidth; // Trigger reflow
+            container.classList.add('animate-fade-in');
+
+            if (list.length === 0) {
+                container.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-zinc-500 mt-10"><i data-lucide="users" class="w-8 h-8 mb-2 opacity-50"></i><p>List is empty</p></div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = list.map(user => {
+                const avatarClass = (user.isRequest ? user.fromAvatar : user.avatarColor) || avatarColors[0];
+                const isUrl = user.isRequest ? user.fromAvatarUrl : user.avatar;
+                const name = user.isRequest ? user.fromName : user.name;
+                
+                const avatarHtml = isUrl 
+                    ? `<div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0"><img src="${isUrl}" class="w-full h-full object-cover"></div>`
+                    : `<div class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold text-sm ${avatarClass}">${name?.[0]?.toUpperCase()}</div>`;
+
+                if (user.isRequest) {
+                    return `
+                        <div class="flex items-center p-3 rounded-xl bg-white/5 mb-2 overflow-hidden">
+                            ${avatarHtml}
+                            <div class="ml-3 flex-1 min-w-0">
+                                <div class="font-medium text-zinc-200 truncate">${escapeHtml(name)}</div>
+                                <div class="text-xs text-zinc-500 truncate">Friend Request</div>
+                            </div>
+                            <div class="flex gap-2 flex-shrink-0">
+                                <button class="p-2 bg-emerald-500/20 text-emerald-500 rounded-full hover:bg-emerald-500/30" data-action="accept" data-id="${user.id}"><i data-lucide="check" class="w-4 h-4"></i></button>
+                                <button class="p-2 bg-red-500/20 text-red-500 rounded-full hover:bg-red-500/30" data-action="decline" data-id="${user.id}"><i data-lucide="x" class="w-4 h-4"></i></button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                const online = isOnline(user);
+                return `
+                    <div class="flex items-center p-3 rounded-xl hover:bg-white/5 cursor-pointer transition-colors mb-1 overflow-hidden" data-user-id="${user.id}">
+                        <div class="relative flex-shrink-0">
+                            ${avatarHtml}
+                            ${online ? '<div class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-zinc-900 rounded-full"></div>' : ''}
+                        </div>
+                        <div class="ml-3 flex-1 min-w-0">
+                            <div class="font-medium text-zinc-200 truncate">${escapeHtml(name)}</div>
+                            <div class="text-xs text-zinc-500 truncate">${online ? 'Online' : formatLastSeen(user.lastSeen)}</div>
+                        </div>
+                        <button class="p-2 text-zinc-500 hover:text-white flex-shrink-0" data-action="chat" data-id="${user.id}"><i data-lucide="message-circle" class="w-5 h-5"></i></button>
+                    </div>
+                `;
+            }).join('');
+
+            bindListEvents(container);
+            lucide.createIcons();
+        }
+
+        function updateChatsList() {
+            // FIX: Using chats object instead of friends object
+            const chatIds = Object.keys(chats);
+            const container = $('chatsList');
+            if (!container) return;
+
+            const chatList = chatIds.map(id => {
+                // Fallback if user not loaded yet
+                const user = allUsers[id] || { name: 'Loading...', avatarColor: avatarColors[0] };
+                const chatInfo = chats[id] || {};
+                return { id, user, lastMessage: chatInfo.lastMessage || '', lastTime: chatInfo.lastTime || 0, unread: chatInfo.unread || 0 };
+            }).sort((a, b) => b.lastTime - a.lastTime);
+
+            if (chatList.length === 0) {
+                container.innerHTML = `<div class="flex flex-col items-center justify-center h-64 text-zinc-500"><i data-lucide="message-square" class="w-10 h-10 mb-3 opacity-30"></i><p>No chats yet</p></div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = chatList.map(chat => {
+                const online = chat.user ? isOnline(chat.user) : false;
+                const isActive = currentChatUserId === chat.id;
+                const avatarContent = chat.user.avatar 
+                    ? `<img src="${chat.user.avatar}" class="w-full h-full object-cover">`
+                    : chat.user.name?.[0]?.toUpperCase() || '?';
+                const avatarClass = chat.user.avatar 
+                    ? 'w-12 h-12 rounded-full overflow-hidden'
+                    : `w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${chat.user.avatarColor || avatarColors[0]}`;
+
+                return `
+                    <div class="flex items-center p-3 rounded-2xl cursor-pointer transition-all duration-200 mb-1 group ${isActive ? 'bg-white/10 shadow-lg' : 'hover:bg-white/5'}" data-user-id="${chat.id}">
+                        <div class="relative flex-shrink-0">
+                            <div class="${avatarClass}">${avatarContent}</div>
+                            ${online ? '<div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-zinc-900 rounded-full"></div>' : ''}
+                        </div>
+                        <div class="ml-3 flex-1 min-w-0">
+                            <div class="flex justify-between items-baseline mb-0.5">
+                                <div class="font-semibold text-zinc-100 truncate pr-2">${escapeHtml(chat.user.name)}</div>
+                                ${chat.lastTime ? `<div class="text-[11px] text-zinc-500 font-medium">${formatTime(chat.lastTime)}</div>` : ''}
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div class="text-sm text-zinc-400 truncate pr-2 ${chat.unread ? 'font-medium text-zinc-200' : ''}">${escapeHtml(chat.lastMessage) || 'Start a conversation'}</div>
+                                ${chat.unread ? `<div class="min-w-[18px] h-[18px] bg-violet-600 rounded-full flex items-center justify-center text-[10px] font-bold text-white px-1.5">${chat.unread}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.querySelectorAll('[data-user-id]').forEach(el => {
+                el.addEventListener('click', () => openChat(el.dataset.userId));
+            });
+            lucide.createIcons();
+        }
+
+        function renderSavedMessages() {
+            const list = Object.values(savedMessages);
+            const container = $('savedList');
+            if (!container) return;
+            
+            if (list.length === 0) {
+                container.innerHTML = `<div class="flex flex-col items-center justify-center h-64 text-zinc-500"><i data-lucide="bookmark" class="w-10 h-10 mb-3 opacity-30"></i><p>No saved messages</p></div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = list.map(msg => `
+                <div class="p-3 bg-zinc-900/50 rounded-xl mb-2 border border-white/5 relative group">
+                    <div class="flex items-center mb-2">
+                        <div class="text-xs font-bold text-violet-400">${escapeHtml(msg.username)}</div>
+                    </div>
+                    <div class="text-sm text-zinc-300">${escapeHtml(msg.text || 'Image')}</div>
+                    <button class="absolute top-2 right-2 p-1.5 text-zinc-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" data-action="remove-saved" data-id="${msg.id}">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            container.onclick = async (e) => {
+                const btn = e.target.closest('[data-action="remove-saved"]');
+                if (btn) {
+                    await remove(ref(database, `saved/${currentUser.uid}/${btn.dataset.id}`));
+                    showToast('Removed from saved', 'success');
+                }
+            };
+            lucide.createIcons();
+        }
+
+        function renderMessages(messages) {
+            const container = $('messagesList');
+            if (!container) return;
+
+            if (!messages || messages.length === 0) {
+                container.innerHTML = `<div class="flex flex-col items-center justify-center py-10 opacity-50"><p class="text-zinc-500 text-sm">No messages yet. Say hello! 👋</p></div>`;
+                return;
+            }
+
+            let html = '';
+            let lastDate = '';
+
+            messages.forEach(msg => {
+                const isOwn = msg.senderId === currentUser.uid;
+                const user = allUsers[msg.senderId] || {};
+                const msgDate = formatDate(msg.timestamp);
+                
+                // Date Divider
+                if (msgDate !== lastDate) {
+                    html += `
+                        <div class="flex justify-center my-4">
+                            <span class="bg-zinc-900/50 text-zinc-400 text-[10px] font-bold px-3 py-1 rounded-full border border-white/5 backdrop-blur-md uppercase tracking-wide">
+                                ${msgDate}
+                            </span>
+                        </div>`;
+                    lastDate = msgDate;
+                }
+
+                // Reply Preview
+                const replyHtml = msg.replyTo ? `
+                    <div class="mb-1 pl-2 border-l-2 ${isOwn ? 'border-white/50 bg-white/10' : 'border-violet-500 bg-black/20'} rounded-r p-1 text-xs cursor-pointer opacity-90">
+                        <div class="font-bold ${isOwn ? 'text-white' : 'text-violet-300'}">${escapeHtml(msg.replyTo.senderName)}</div>
+                        <div class="truncate opacity-80 text-white/80">${escapeHtml(msg.replyTo.text || 'Image')}</div>
+                    </div>` : '';
+
+                // Content
+                const content = msg.image 
+                    ? `<img src="${msg.image}" class="rounded-lg max-w-full cursor-pointer hover:opacity-90 transition-opacity mb-1" onclick="viewImage('${msg.image}')">`
+                    : `<div class="text-[15px] leading-relaxed break-words text-white">${escapeHtml(msg.text)}</div>`;
+
+                // Bubble Styling (Fixed Contrast)
+                const bubbleClass = isOwn 
+                    ? 'bg-violet-600 text-white rounded-2xl rounded-tr-sm shadow-md' 
+                    : 'bg-zinc-800 text-white rounded-2xl rounded-tl-sm shadow-sm border border-white/5';
+                    
+                // Avatar for others
+                const avatarHtml = !isOwn ? `
+                    <div class="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden mr-2 self-end mb-1 bg-zinc-800 border border-white/5 z-10">
+                        ${user.avatar ? `<img src="${user.avatar}" class="w-full h-full object-cover">` : `<div class="w-full h-full flex items-center justify-center text-xs font-bold text-white ${user.avatarColor || avatarColors[0]}">${user.name?.[0] || '?'}</div>`}
+                    </div>` : '';
+
+                // Message Item Structure
+                html += `
+                    <div class="flex mb-2 ${isOwn ? 'justify-end' : 'justify-start'} group message-item relative z-10" data-message-id="${msg.id}" data-sender-id="${msg.senderId}">
+                        ${avatarHtml}
+                        <div class="flex flex-col max-w-[75%] ${isOwn ? 'items-end' : 'items-start'}">
+                            <div class="px-4 py-2 ${bubbleClass} relative group-hover:brightness-110 transition-all">
+                                ${replyHtml}
+                                ${content}
+                                <div class="flex items-center justify-end gap-1 mt-0.5 opacity-60">
+                                    <span class="text-[10px] font-medium text-white/80">${formatTime(msg.timestamp)}</span>
+                                    ${msg.edited ? '<span class="text-[10px] italic text-white/70">edited</span>' : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            
+            // Force Scroll
+            setTimeout(() => {
+                const area = $('messagesArea');
+                if(area) area.scrollTop = area.scrollHeight;
+            }, 50);
+
+            // Context Menu Logic
+            container.querySelectorAll('.message-item').forEach(el => {
+                el.addEventListener('contextmenu', e => {
+                    e.preventDefault();
+                    const msg = messages.find(m => m.id === el.dataset.messageId);
+                    showContextMenu(e, msg);
+                });
+                
+                let timer;
+                el.addEventListener('touchstart', e => {
+                    timer = setTimeout(() => {
+                        const msg = messages.find(m => m.id === el.dataset.messageId);
+                        showContextMenu(e.touches[0], msg);
+                    }, 500);
+                });
+                el.addEventListener('touchend', () => clearTimeout(timer));
+            });
+        }
+
+        // ==================== ACTIONS ====================
+        function openChat(userId) {
+            if (!userId) return;
+            const user = allUsers[userId];
+            if (!user) return;
+
+            currentChatId = [currentUser.uid, userId].sort().join('_');
+            currentChatUserId = userId;
+
+            $('mainEmpty').classList.add('hidden');
+            $('userProfileView').classList.add('hidden');
+            $('chatContainer').classList.remove('hidden');
+            
+            // Mobile view handling
+            if (window.innerWidth < 768) {
+                $('chatContainer').style.position = 'fixed';
+                $('chatContainer').style.inset = '0';
+                $('chatContainer').style.zIndex = '50';
+                // Hide bottom dock and sidebar
+                $('mobileDock').classList.add('translate-y-24', 'opacity-0');
+                $('sidebarPanel').classList.add('hidden');
+            }
+
+            updateChatHeader(userId);
+            update(ref(database, `userChats/${currentUser.uid}/${userId}`), { unread: 0 });
+            subscribeToMessages();
+            subscribeToTyping();
+            updateChatsList();
+        }
+
+        function updateChatHeader(userId) {
+            const user = allUsers[userId];
+            if (!user) return;
+
+            const avatar = $('chatAvatar');
+            if (user.avatar) {
+                avatar.innerHTML = `<img src="${user.avatar}" class="w-full h-full object-cover">`;
+                avatar.className = 'w-10 h-10 rounded-full overflow-hidden';
+            } else {
+                avatar.innerHTML = user.name?.[0]?.toUpperCase();
+                avatar.className = `w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${user.avatarColor || avatarColors[0]}`;
+            }
+
+            $('chatName').textContent = user.name;
+            const online = isOnline(user);
+            $('chatStatus').textContent = online ? 'Online' : formatLastSeen(user.lastSeen);
+            $('chatStatus').className = online ? 'text-xs text-emerald-400 font-medium' : 'text-xs text-zinc-500';
+        }
+
+        function sendMessage() {
+            const input = $('messageInput');
+            const text = input.value.trim();
+            if (!text && !editingMessage) return;
+
+            if (editingMessage) {
+                update(ref(database, `messages/${currentChatId}/${editingMessage.id}`), { text, edited: true });
+                cancelEdit();
+                return;
+            }
+
+            const msg = { text, senderId: currentUser.uid, timestamp: serverTimestamp() };
+            if (replyingTo) { msg.replyTo = replyingTo; cancelReply(); }
+
+            push(ref(database, `messages/${currentChatId}`), msg);
+            input.value = '';
+            
+            const updateData = { lastMessage: text, lastTime: serverTimestamp() };
+            update(ref(database, `userChats/${currentUser.uid}/${currentChatUserId}`), updateData);
+            
+            // Counter logic needs read from DB to be atomic, simplified here
+            get(ref(database, `userChats/${currentChatUserId}/${currentUser.uid}/unread`)).then(snap => {
+                update(ref(database, `userChats/${currentChatUserId}/${currentUser.uid}`), {
+                    ...updateData,
+                    unread: (snap.val() || 0) + 1
+                });
+            });
+        }
+
+        function sendImage(base64) {
+            if (!currentChatId) return;
+            push(ref(database, `messages/${currentChatId}`), {
+                image: base64,
+                senderId: currentUser.uid,
+                timestamp: serverTimestamp()
+            });
+            const updateData = { lastMessage: '📷 Image', lastTime: serverTimestamp() };
+            update(ref(database, `userChats/${currentUser.uid}/${currentChatUserId}`), updateData);
+            update(ref(database, `userChats/${currentChatUserId}/${currentUser.uid}`), updateData);
+        }
+
+        function sendFriendRequest(userId) {
+            if (sentRequests[userId] || friends[userId]) return;
+            const data = { 
+                from: currentUser.uid, 
+                fromName: userData.name, 
+                fromAvatar: userData.avatarColor, 
+                fromAvatarUrl: userData.avatar || null, 
+                timestamp: serverTimestamp() 
+            };
+            set(ref(database, `friendRequests/${userId}/${currentUser.uid}`), data);
+            set(ref(database, `sentRequests/${currentUser.uid}/${userId}`), { timestamp: serverTimestamp() });
+            showToast('Request sent', 'success');
+        }
+
+        // ==================== HELPERS ====================
+        function bindListEvents(container) {
+            container.onclick = (e) => {
+                const btn = e.target.closest('[data-action]');
+                if (!btn) return;
+                e.stopPropagation();
+                const { action, id } = btn.dataset;
+                if (action === 'chat') openChat(id);
+                if (action === 'accept') {
+                    set(ref(database, `friends/${currentUser.uid}/${id}`), { since: serverTimestamp() });
+                    set(ref(database, `friends/${id}/${currentUser.uid}`), { since: serverTimestamp() });
+                    remove(ref(database, `friendRequests/${currentUser.uid}/${id}`));
+                }
+                if (action === 'decline') remove(ref(database, `friendRequests/${currentUser.uid}/${id}`));
+            };
+        }
+
+        function setupEventListeners() {
+            // Nav (Desktop)
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.nav-item').forEach(b => {
+                        b.classList.remove('bg-white/10', 'text-white');
+                        b.classList.add('text-zinc-500');
+                    });
+                    btn.classList.add('bg-white/10', 'text-white');
+                    btn.classList.remove('text-zinc-500');
+                    
+                    document.querySelectorAll('.panel-content').forEach(p => p.classList.add('hidden'));
+                    const panelId = btn.dataset.tab + 'Panel';
+                    $(panelId).classList.remove('hidden');
+                });
+            });
+
+            // Nav (Mobile Dock)
+            document.querySelectorAll('.nav-item-mobile').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.nav-item-mobile').forEach(b => {
+                        b.classList.remove('bg-white/10', 'text-white');
+                        b.classList.add('text-zinc-500');
+                    });
+                    btn.classList.add('bg-white/10', 'text-white');
+                    btn.classList.remove('text-zinc-500');
+                    
+                    document.querySelectorAll('.panel-content').forEach(p => p.classList.add('hidden'));
+                    const panelId = btn.dataset.tab + 'Panel';
+                    const panel = $(panelId);
+                    if(panel) panel.classList.remove('hidden');
+                    
+                    // Reset any chat view state
+                    $('sidebarPanel').classList.remove('hidden');
+                    $('chatContainer').classList.add('hidden');
+                    
+                    // Sync with desktop nav visually (optional but good for resizing)
+                    const desktopBtn = document.querySelector(`.nav-item[data-tab="${btn.dataset.tab}"]`);
+                    if(desktopBtn) desktopBtn.click();
+                });
+            });
+
+            // FIX: Friends Tabs Listeners
+            document.querySelectorAll('.panel-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // UI Update
+                    document.querySelectorAll('.panel-tab').forEach(b => {
+                        b.classList.remove('bg-white/10', 'text-white');
+                        b.classList.add('text-zinc-500', 'hover:bg-white/5', 'hover:text-zinc-300');
+                    });
+                    btn.classList.remove('text-zinc-500', 'hover:bg-white/5', 'hover:text-zinc-300');
+                    btn.classList.add('bg-white/10', 'text-white');
+                    
+                    // Render logic
+                    renderFriendsList(btn.dataset.friendsTab);
+                });
+            });
+
+            // Chat
+            $('sendBtn').addEventListener('click', sendMessage);
+            $('messageInput').addEventListener('keypress', e => {
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+            });
+            $('backBtn').addEventListener('click', () => {
+                $('chatContainer').classList.add('hidden');
+                $('mainEmpty').classList.remove('hidden');
+                
+                // Mobile Restore
+                if (window.innerWidth < 768) {
+                    $('sidebarPanel').classList.remove('hidden');
+                    $('mobileDock').classList.remove('translate-y-24', 'opacity-0');
+                }
+                
+                currentChatId = null;
+            });
+
+            // Profile & Settings
+            $('navAvatar').addEventListener('click', () => {
+                document.querySelectorAll('.panel-content').forEach(p => p.classList.add('hidden'));
+                $('settingsPanel').classList.remove('hidden');
+            });
+            
+            // Settings Nav (Mobile)
+            const settingsBtn = document.querySelector('.nav-item-mobile[data-tab="settings"]');
+            if(settingsBtn) {
+                settingsBtn.addEventListener('click', () => {
+                    document.querySelectorAll('.panel-content').forEach(p => p.classList.add('hidden'));
+                    $('settingsPanel').classList.remove('hidden');
+                });
+            }
+
+            // Image Compression Helper
+            const compressImage = (file, maxWidth = 800, quality = 0.7) => {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.src = event.target.result;
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            let width = img.width;
+                            let height = img.height;
+
+                            if (width > maxWidth) {
+                                height = (height * maxWidth) / width;
+                                width = maxWidth;
+                            }
+
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            resolve(canvas.toDataURL('image/jpeg', quality));
+                        };
+                        img.onerror = (err) => reject(err);
+                    };
+                    reader.onerror = (err) => reject(err);
+                });
+            };
+
+            $('avatarInput').addEventListener('change', async e => {
+                const file = e.target.files[0];
+                if (file) {
+                    showToast('Processing image...', 'info');
+                    try {
+                        const compressedBase64 = await compressImage(file, 300, 0.7); // Smaller for avatars
+                        await update(ref(database, `users/${currentUser.uid}`), { avatar: compressedBase64 });
+                        showToast('Avatar updated', 'success');
+                    } catch (error) {
+                        console.error(error);
+                        showToast('Failed to process image', 'error');
+                    }
+                    e.target.value = ''; // Reset input
+                }
+            });
+            
+            $('attachBtn').addEventListener('click', () => $('fileInput').click());
+            $('fileInput').addEventListener('change', async e => {
+                const file = e.target.files[0];
+                if (file) {
+                    showToast('Sending image...', 'info');
+                    try {
+                        const compressedBase64 = await compressImage(file, 800, 0.7);
+                        await sendImage(compressedBase64);
+                        showToast('Image sent', 'success');
+                    } catch (error) {
+                        console.error(error);
+                        showToast('Failed to send image', 'error');
+                    }
+                    e.target.value = ''; // Reset input
+                }
+            });
+
+            $('saveProfileBtn').addEventListener('click', () => {
+                const name = $('settingsName').value;
+                const status = $('settingsStatus').value;
+                if (name) {
+                    update(ref(database, `users/${currentUser.uid}`), { name, status });
+                    showToast('Profile saved', 'success');
+                }
+            });
+            
+            // Search
+            $('searchUsers').addEventListener('input', () => renderUsersList());
+            
+            // Context Menu
+            document.addEventListener('click', e => {
+                if (!e.target.closest('#messageContextMenu')) $('messageContextMenu').classList.add('hidden');
+            });
+            
+            // Context Menu Actions
+            document.querySelectorAll('#messageContextMenu button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    $('messageContextMenu').classList.add('hidden');
+                    const msg = window.selectedMessage; // Hacky but simple
+                    if (!msg) return;
+                    
+                    const action = btn.dataset.action;
+                    if (action === 'reply') setReplyTo(msg);
+                    if (action === 'edit') setEditMessage(msg);
+                    if (action === 'copy') { navigator.clipboard.writeText(msg.text); showToast('Copied', 'success'); }
+                    if (action === 'delete') remove(ref(database, `messages/${currentChatId}/${msg.id}`));
+                    if (action === 'save') {
+                        set(ref(database, `saved/${currentUser.uid}/${msg.id}`), { ...msg, savedAt: serverTimestamp() });
+                        showToast('Saved', 'success');
+                    }
+                });
+            });
+
+            // FIX: Chat Menu Logic
+            $('chatMenuBtn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                const menu = $('chatDropdown');
+                if (menu) menu.classList.toggle('hidden');
+            });
+
+            // Clear history needs the button which might not be in DOM yet if we replaced HTML, 
+            // but in this version we assume HTML has the #chatDropdown with a button inside.
+            // We'll use event delegation for robustness or just query it if it exists.
+            const clearBtn = document.querySelector('#chatDropdown button');
+            if(clearBtn) {
+                clearBtn.addEventListener('click', async () => {
+                    if (currentChatId && confirm('Clear history?')) {
+                        await remove(ref(database, `messages/${currentChatId}`));
+                        showToast('Chat cleared', 'success');
+                    }
+                    $('chatDropdown').classList.add('hidden');
                 });
             }
             
-            update(ref(db), updates);
-            
-            if(type === 'text') {
-                $('msgInput').value = '';
-                handleInput($('msgInput'));
-            }
-        };
-
-        window.handleInput = (el) => {
-            el.style.height = 'auto';
-            el.style.height = el.scrollHeight + 'px';
-            const hasText = el.value.trim().length > 0;
-            $('sendBtn').classList.toggle('hidden', !hasText);
-            $('voiceBtn').classList.toggle('hidden', hasText);
-            
-            if(!activeChat.name) {
-                const chatId = getChatId(activeChatId);
-                set(ref(db, `typing/${chatId}/${currentUser.uid}`), true);
-                clearTimeout(typingTimeout);
-                typingTimeout = setTimeout(() => remove(ref(db, `typing/${chatId}/${currentUser.uid}`)), 2000);
-            }
-        };
-
-        window.toggleSearchInChat = () => $('inChatSearch').classList.toggle('hidden');
-        window.searchMessages = (term) => {
-            const els = $('messagesList').querySelectorAll('.message-group');
-            els.forEach(el => {
-                const txt = el.innerText.toLowerCase();
-                el.style.display = txt.includes(term.toLowerCase()) ? 'flex' : 'none';
-            });
-        };
-
-        window.startRecording = () => {
-            navigator.mediaDevices.getUserMedia({audio:true}).then(s => {
-                mediaRecorder = new MediaRecorder(s);
-                audioChunks = [];
-                mediaRecorder.start();
-                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                
-                $('recordingUI').classList.remove('hidden');
-                let sec = 0;
-                timerInt = setInterval(() => {
-                    sec++;
-                    const m = Math.floor(sec/60).toString().padStart(2,'0');
-                    $('recordingTime').textContent = `${m}:${(sec%60).toString().padStart(2,'0')}`;
-                }, 1000);
-            });
-        };
-        window.stopRecording = () => {
-            if(mediaRecorder) {
-                mediaRecorder.stop();
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(audioChunks);
-                    const reader = new FileReader();
-                    reader.onload = e => sendMessage('audio', e.target.result);
-                    reader.readAsDataURL(blob);
-                    cancelRecording();
-                };
-            }
-        };
-        window.cancelRecording = () => {
-            if(mediaRecorder) mediaRecorder.stop();
-            clearInterval(timerInt);
-            $('recordingUI').classList.add('hidden');
-            $('recordingTime').textContent = '00:00';
-        };
-        window.playAudio = (src) => new Audio(src).play();
-
-        $('fileInput').onchange = e => {
-            const f = e.target.files[0];
-            if(f) {
-                const r = new FileReader();
-                r.onload = ev => sendMessage('image', ev.target.result);
-                r.readAsDataURL(f);
-            }
-        };
-
-        window.openCreateGroupModal = () => $('groupModal').classList.add('open');
-        window.createGroup = async () => {
-            const name = $('groupName').value;
-            const checks = $('groupUserList').querySelectorAll('input:checked');
-            if(!name || checks.length === 0) return showToast('Введите название и выберите участников');
-            
-            const gid = push(ref(db, 'groups')).key;
-            await update(ref(db, `user-chats/${currentUser.uid}/${gid}`), {
-                name, timestamp: serverTimestamp(), unread: 0,
-                lastMessage: 'Группа создана'
+            document.addEventListener('click', (e) => {
+                const menu = $('chatDropdown');
+                if (menu && !menu.contains(e.target) && e.target.id !== 'chatMenuBtn') {
+                    menu.classList.add('hidden');
+                }
             });
             
-            $('groupModal').classList.remove('open');
-            showToast('Группа создана (локально)');
-        };
-
-        window.closeChat = () => $('mainArea').classList.remove('open');
-        window.saveProfile = () => {
-            const name = $('settingsName').value;
-            const status = $('settingsStatus').value;
-            update(ref(db, `users/${currentUser.uid}`), { name, status });
-            showToast('Сохранено');
-        };
-        function showToast(msg) {
-            const t = $('toast');
-            t.textContent = msg;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
+            // User Profile Sidebar
+            $('chatUserInfo').addEventListener('click', () => {
+                if(currentChatUserId) showUserProfile(currentChatUserId);
+            });
+            
+            $('closeProfileBtn').addEventListener('click', () => {
+                $('userProfileView').classList.add('hidden');
+            });
+            
+            // Image Viewer
+            $('closeImageViewer').addEventListener('click', () => {
+                $('imageViewer').classList.add('hidden');
+            });
+            
+            // Calls
+            $('callBtn').addEventListener('click', () => startCall());
+            $('endCallBtn').addEventListener('click', () => endCall());
+            $('declineCallBtn').addEventListener('click', () => endCall());
+            $('acceptCallBtn').addEventListener('click', () => {
+                if (activeCall) {
+                    update(ref(database, `calls/${currentUser.uid}`), { status: 'accepted' });
+                    update(ref(database, `calls/${activeCall.partnerId}`), { status: 'accepted' });
+                    $('incomingCall').classList.add('hidden');
+                    showCallModal(activeCall.data);
+                    $('callStatusText').textContent = 'Connected';
+                    startCallTimer();
+                }
+            });
         }
 
-        window.filterList = (id, term) => {
-            const list = $(id).children;
-            for(let item of list) {
-                item.style.display = item.innerText.toLowerCase().includes(term.toLowerCase()) ? 'flex' : 'none';
-            }
-        };
+        function showContextMenu(e, msg) {
+            window.selectedMessage = msg;
+            const menu = $('messageContextMenu');
+            menu.classList.remove('hidden');
+            
+            // Positioning
+            const x = Math.min(e.clientX, window.innerWidth - 180);
+            const y = Math.min(e.clientY, window.innerHeight - 250);
+            menu.style.left = `${x}px`;
+            menu.style.top = `${y}px`;
+            
+            // Permissions
+            const isOwn = msg.senderId === currentUser.uid;
+            menu.querySelector('[data-action="edit"]').style.display = isOwn ? 'flex' : 'none';
+            menu.querySelector('[data-action="delete"]').style.display = isOwn ? 'flex' : 'none';
+        }
 
-        window.toggleReaction = (chatUid, msgId, own) => {
-            const chatId = activeChat.name ? chatUid : getChatId(chatUid);
-            const rRef = ref(db, `messages/${chatId}/${msgId}/reaction`);
-            get(rRef).then(s => {
-                if(s.val()) remove(rRef);
-                else set(rRef, true);
+        function setReplyTo(msg) {
+            replyingTo = msg;
+            const bar = document.createElement('div');
+            bar.id = 'replyBar';
+            bar.className = 'flex items-center p-3 bg-zinc-800 border-t border-white/5';
+            bar.innerHTML = `
+                <div class="w-1 h-8 bg-violet-500 rounded-full mr-3"></div>
+                <div class="flex-1 overflow-hidden">
+                    <div class="text-xs font-bold text-violet-400">Replying to ${allUsers[msg.senderId]?.name || 'User'}</div>
+                    <div class="text-xs text-zinc-400 truncate">${msg.text}</div>
+                </div>
+                <button class="p-2 text-zinc-500 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+            `;
+            bar.querySelector('button').onclick = cancelReply;
+            const footer = $('messageInput').closest('footer');
+            footer.insertBefore(bar, footer.firstChild);
+            $('messageInput').focus();
+        }
+
+        function cancelReply() {
+            replyingTo = null;
+            const bar = $('replyBar');
+            if (bar) bar.remove();
+        }
+
+        function setEditMessage(msg) {
+            editingMessage = msg;
+            $('messageInput').value = msg.text;
+            $('messageInput').focus();
+            $('sendBtn').innerHTML = '<i data-lucide="check" class="w-5 h-5"></i>';
+        }
+
+        function cancelEdit() {
+            editingMessage = null;
+            $('messageInput').value = '';
+            $('sendBtn').innerHTML = '<i data-lucide="send" class="w-5 h-5"></i>';
+            lucide.createIcons();
+        }
+
+        function setupEmojiPicker() {
+            const picker = $('emojiPicker');
+            const grid = $('emojiGrid');
+            
+            $('emojiBtn').onclick = (e) => {
+                e.stopPropagation();
+                picker.classList.toggle('hidden');
+            };
+            
+            // Render basic smileys
+            grid.innerHTML = emojiCategories.smileys.map(e => 
+                `<button class="w-8 h-8 text-xl hover:bg-white/10 rounded transition-colors">${e}</button>`
+            ).join('');
+            
+            grid.onclick = e => {
+                if (e.target.tagName === 'BUTTON') {
+                    $('messageInput').value += e.target.textContent;
+                    picker.classList.add('hidden');
+                }
+            };
+            
+            document.addEventListener('click', e => {
+                if (!picker.contains(e.target) && e.target.id !== 'emojiBtn') picker.classList.add('hidden');
             });
-        };
+        }
+
+        function subscribeToMessages() {
+            if (messagesUnsubscribe) messagesUnsubscribe();
+
+            const messagesRef = query(ref(database, `messages/${currentChatId}`), limitToLast(100));
+
+            messagesUnsubscribe = onValue(messagesRef, (snapshot) => {
+                const messages = [];
+                snapshot.forEach((child) => {
+                    messages.push({ id: child.key, ...child.val() });
+                });
+                renderMessages(messages);
+            });
+        }
+
+        function subscribeToTyping() {
+            if (typingUnsubscribe) typingUnsubscribe();
+            if (!currentChatUserId) return;
+
+            const typingRef = ref(database, `typing/${currentChatId}/${currentChatUserId}`);
+
+            typingUnsubscribe = onValue(typingRef, (snapshot) => {
+                const indicator = $('typingIndicator');
+                if (snapshot.exists() && snapshot.val().isTyping) {
+                    indicator.classList.remove('hidden');
+                } else {
+                    indicator.classList.add('hidden');
+                }
+            });
+        }
+        
+        // ==================== MISSING FUNCTIONS STUBS ====================
+        
+        function loadSettings() {
+            if (!userData) return;
+            $('settingsName').value = userData.name || '';
+            $('settingsStatus').value = userData.status || '';
+            
+            const preview = $('settingsAvatarPreview');
+            if (userData.avatar) {
+                preview.innerHTML = `<img src="${userData.avatar}" class="w-full h-full object-cover">`;
+                preview.className = 'w-24 h-24 rounded-full overflow-hidden ring-4 ring-zinc-800';
+            } else {
+                preview.innerHTML = userData.name?.[0]?.toUpperCase() || '?';
+                preview.className = `w-24 h-24 rounded-full flex items-center justify-center text-white font-bold text-3xl ring-4 ring-zinc-800 ${userData.avatarColor || avatarColors[0]}`;
+            }
+        }
+
+        window.viewImage = function(src) {
+            $('imageViewerImg').src = src;
+            $('imageViewer').classList.remove('hidden');
+        }
+
+        function showUserProfile(userId) {
+            const user = allUsers[userId];
+            if(!user) return;
+            
+            const view = $('userProfileView');
+            $('profileViewName').textContent = user.name;
+            $('profileViewStatus').textContent = user.status || 'No status';
+            
+            const avatar = $('profileViewAvatar');
+            if (user.avatar) {
+                avatar.innerHTML = `<img src="${user.avatar}" class="w-full h-full object-cover">`;
+                avatar.className = 'w-24 h-24 rounded-full bg-zinc-800 mb-4 overflow-hidden';
+            } else {
+                avatar.innerHTML = user.name?.[0]?.toUpperCase() || '?';
+                avatar.className = `w-24 h-24 rounded-full bg-zinc-800 mb-4 flex items-center justify-center text-white font-bold text-3xl ${user.avatarColor || avatarColors[0]}`;
+            }
+            
+            view.classList.remove('hidden');
+        }
+        
+        function startCall() {
+            showToast('Calls are coming soon!', 'info');
+            // Stub functionality
+        }
+        
+        function endCall() {
+            $('incomingCall').classList.add('hidden');
+            activeCall = null;
+        }
+        
+        function startCallTimer() {
+            // Stub
+        }
+        
+        function subscribeToCalls() {
+            // Stub - not implementing real signaling here to keep simple
+        }
+        
+        function showCallModal(data) {
+            // Stub
+        }
+
+        // Start
+        init();
     </script>
 </body>
 </html>
